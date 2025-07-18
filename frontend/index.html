@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Attendance System</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for a clean font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+        /* Main container for the app */
+        .container {
+            max-width: 90%;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        /* Styling for section titles */
+        .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        /* Input field grouping */
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        /* General button styling */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        /* Primary button styling */
+        .btn-primary {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+        /* Secondary button styling */
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #2d3748;
+        }
+        .btn-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        /* Message box for success/error alerts */
+        .message-box {
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-align: center;
+        }
+        .message-success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .message-error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        /* Styling for individual student items in lists */
+        .student-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: #f7fafc;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .student-item:hover {
+            background-color: #edf2f7;
+        }
+        /* Attendance status text styling */
+        .attendance-status {
+            font-weight: 600;
+        }
+        .present {
+            color: #10b981; /* Green */
+        }
+        .absent {
+            color: #ef4444; /* Red */
+        }
+        /* Responsive adjustments for larger screens */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="container">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-6">Online Attendance System</h1>
+
+        <!-- User ID and Logout Button (visible only when a lecturer is logged in) -->
+        <div id="user-info-section" class="text-center text-sm text-gray-600 mb-4 hidden">
+            Your Session User ID: <span id="current-user-id" class="font-mono text-blue-600">Loading...</span>
+            <button id="logout-btn" class="btn btn-secondary ml-4">Logout</button>
+        </div>
+
+        <!-- Message Box for displaying success/error messages to the user -->
+        <div id="message-box" class="message-box hidden"></div>
+
+        <!-- Lecturer Login Section -->
+        <div id="login-section" class="p-6 bg-gray-100 rounded-lg shadow-inner mb-8">
+            <h2 class="section-title text-gray-800">Lecturer Login</h2>
+            <div class="input-group">
+                <label for="username-input" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                <input type="email" id="username-input" placeholder="e.g., your_lecturer_email@example.com" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-gray-500">
+            </div>
+            <div class="input-group mb-4">
+                <label for="password-input" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
+                <input type="password" id="password-input" placeholder="Enter password" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-gray-500">
+            </div>
+            <button id="login-btn" class="btn btn-primary w-full">Login</button>
+            <p class="text-sm text-gray-600 mt-4 text-center">
+                To log in, use an email and password registered in your Firebase project's Authentication section.
+                You can add users in Firebase Console > Authentication > Users.
+            </p>
+        </div>
+
+        <!-- Lecturer Portal Section -->
+        <div id="lecturer-section" class="mb-8 p-6 bg-indigo-50 rounded-lg shadow-inner hidden">
+            <h2 class="section-title text-indigo-700">Lecturer Portal</h2>
+
+            <!-- Bulk Upload Students (CSV) -->
+            <div class="mb-6 p-4 bg-blue-100 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-blue-800 mb-3 text-center">Bulk Upload Students (CSV)</h3>
+                <p class="text-sm text-gray-700 mb-3">Upload a CSV file with columns: `studentId,rollNumber,name,branch,department,section`</p>
+                <input type="file" id="csv-upload-input" accept=".csv" class="block w-full text-sm text-gray-700
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-md file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100
+                "/>
+                <button id="upload-csv-btn" class="btn btn-primary w-full mt-4 bg-blue-600 hover:bg-blue-700">Upload Students from CSV</button>
+            </div>
+
+            <!-- Filters for marking attendance -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="input-group">
+                    <label for="class-name" class="block text-gray-700 text-sm font-bold mb-1">Class Name:</label>
+                    <input type="text" id="class-name" placeholder="e.g., Engineering Mathematics I" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="input-group">
+                    <label for="attendance-date" class="block text-gray-700 text-sm font-bold mb-1">Date:</label>
+                    <input type="date" id="attendance-date" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="input-group">
+                    <label for="filter-branch" class="block text-gray-700 text-sm font-bold mb-1">Branch:</label>
+                    <select id="filter-branch" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Branches</option>
+                        <option value="CSE">CSE</option>
+                        <option value="ECE">ECE</option>
+                        <option value="MECH">MECH</option>
+                        <!-- Add more branches as needed -->
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="filter-department" class="block text-gray-700 text-sm font-bold mb-1">Department:</label>
+                    <select id="filter-department" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Departments</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <!-- Add more departments as needed -->
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="filter-section" class="block text-gray-700 text-sm font-bold mb-1">Section:</label>
+                    <select id="filter-section" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Sections</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <!-- Add more sections as needed -->
+                    </select>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Mark Attendance for Selected Class:</h3>
+            <div id="student-list-lecturer" class="space-y-2 mb-4">
+                <!-- Students will be loaded here dynamically from the backend -->
+                <p class="text-gray-500 text-center">Please select filters to load students.</p>
+            </div>
+            <button id="save-attendance-btn" class="btn btn-primary w-full">Save Attendance</button>
+        </div>
+
+        <!-- Student Portal Section (Always visible) -->
+        <div id="student-section" class="p-6 bg-green-50 rounded-lg shadow-inner">
+            <h2 class="section-title text-green-700">Student Portal (Free Access)</h2>
+            <div class="input-group">
+                <label for="student-id-input" class="block text-gray-700 text-sm font-bold mb-2">Your Student ID:</label>
+                <input type="text" id="student-id-input" placeholder="Enter your ID (e.g., S001)" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500">
+            </div>
+            <button id="view-attendance-btn" class="btn btn-primary w-full mb-4">View My Attendance</button>
+
+            <div id="student-attendance-display" class="hidden">
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Your Attendance Percentage:</h3>
+                <p id="attendance-percentage" class="text-2xl font-bold text-center text-blue-600 mb-4">--%</p>
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Your Attendance Details:</h3>
+                <div id="student-attendance-details" class="space-y-2">
+                    <p class="text-gray-500 text-center">No attendance records found.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- Firebase Configuration ---
+        // IMPORTANT: Replace these placeholder values with your actual Firebase project configuration.
+        // You can find this in your Firebase Console -> Project settings (gear icon) -> Your apps -> Web app -> Firebase SDK snippet (Config).
+        // Ensure ALL fields (apiKey, authDomain, projectId, etc.) are correctly copied.
+        const firebaseConfig = {
+  apiKey: "AIzaSyCZw-psITQ1bgw1nl7HnG56Q9F-c6nH-F8",
+  authDomain: "attendance-3f978.firebaseapp.com",
+  projectId: "attendance-3f978",
+  storageBucket: "attendance-3f978.firebasestorage.app",
+  messagingSenderId: "385341970643",
+  appId: "1:385341970643:web:e8aaa51b8b22f93588dc26",
+  measurementId: "G-HD45MB18DJ"
+};
+
+        // Log the firebaseConfig to the console for debugging purposes.
+        // CHECK YOUR BROWSER CONSOLE (F12) to ensure these values are correct!
+        console.log("Firebase Config loaded:", firebaseConfig);
+
+        // Use projectId as appId for consistency with backend Firestore paths (artifacts/{projectId}/public/data/...)
+        const appId = firebaseConfig.projectId; 
+        console.log("App ID being used for Firestore paths:", appId); 
+
+        // initialAuthToken is typically provided by the Canvas environment for specific authentication flows.
+        // For local VS Code development, it's usually null, so we sign in anonymously.
+        const initialAuthToken = null; 
+
+        // --- Firebase Imports ---
+        // These URLs point to the Firebase SDK hosted on Google's CDN.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Global Firebase Variables ---
+        let app; // Firebase app instance
+        let db;  // Firestore database instance
+        let auth; // Firebase Auth instance
+        let sessionUserId = null; // Stores the current Firebase user's UID
+        let currentUserRole = null; // 'lecturer' or null (determines UI visibility)
+        let allStudentsData = []; // Stores all student data fetched from the Python Backend
+        let isAuthReady = false; // Flag to indicate if Firebase Authentication is fully initialized
+
+        // --- Backend URL Configuration ---
+        // This is the address where your Flask backend will be running.
+        // If you change the Flask port, update this URL.
+        const BACKEND_URL = 'http://127.0.0.1:5000'; 
+
+        // --- DOM Element References ---
+        // Get references to various HTML elements for interaction.
+        const userInfoSection = document.getElementById('user-info-section');
+        const currentUserIdSpan = document.getElementById('current-user-id');
+        const logoutBtn = document.getElementById('logout-btn');
+        const messageBox = document.getElementById('message-box');
+
+        const loginSection = document.getElementById('login-section');
+        const usernameInput = document.getElementById('username-input'); 
+        const passwordInput = document.getElementById('password-input');
+        const loginBtn = document.getElementById('login-btn');
+
+        const lecturerSection = document.getElementById('lecturer-section');
+        const classNameInput = document.getElementById('class-name');
+        const attendanceDateInput = document.getElementById('attendance-date');
+        const studentListLecturer = document.getElementById('student-list-lecturer');
+        const saveAttendanceBtn = document.getElementById('save-attendance-btn');
+
+        const filterBranchSelect = document.getElementById('filter-branch');
+        const filterDepartmentSelect = document.getElementById('filter-department');
+        const filterSectionSelect = document.getElementById('filter-section');
+
+        const csvUploadInput = document.getElementById('csv-upload-input');
+        const uploadCsvBtn = document.getElementById('upload-csv-btn');
+
+        const studentSection = document.getElementById('student-section');
+        const studentIdInput = document.getElementById('student-id-input');
+        const viewAttendanceBtn = document.getElementById('view-attendance-btn');
+        const studentAttendanceDisplay = document.getElementById('student-attendance-display');
+        const attendancePercentage = document.getElementById('attendance-percentage');
+        const studentAttendanceDetails = document.getElementById('student-attendance-details');
+
+        // --- Utility Functions ---
+
+        /**
+         * Displays a message to the user in a dedicated message box.
+         * @param {string} message - The message text.
+         * @param {'success'|'error'} type - The type of message (determines styling).
+         */
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type === 'success' ? 'message-success' : 'message-error'}`;
+            messageBox.classList.remove('hidden');
+            // Hide the message after 5 seconds
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000); 
+        }
+
+        /**
+         * Renders the UI sections based on the current user's role.
+         * Student section is always visible. Lecturer sections are conditional.
+         */
+        function renderUI() {
+            // Hide all lecturer-specific UI elements by default
+            loginSection.classList.add('hidden');
+            lecturerSection.classList.add('hidden');
+            userInfoSection.classList.add('hidden'); // Hide user ID and logout button
+
+            // Student section is always visible for anyone accessing the page
+            studentSection.classList.remove('hidden');
+
+            if (currentUserRole === 'lecturer') {
+                // If a lecturer is logged in, show their specific portal and user info
+                lecturerSection.classList.remove('hidden');
+                userInfoSection.classList.remove('hidden');
+            } else {
+                // If no lecturer is logged in, show the login section for lecturers
+                // The student section remains visible for free access.
+                loginSection.classList.remove('hidden');
+            }
+        }
+
+        // --- Firebase Initialization and Authentication ---
+
+        /**
+         * Initializes Firebase and sets up authentication listeners.
+         * This function handles the initial anonymous sign-in for student access.
+         */
+        async function initializeFirebase() {
+            try {
+                // Initialize Firebase app with the provided config
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                console.log("Firebase app, db, auth initialized.");
+
+                // Set up an authentication state change listener.
+                // This function runs whenever the user's login status changes.
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        // User is signed in (could be anonymous or lecturer)
+                        sessionUserId = user.uid;
+                        currentUserIdSpan.textContent = sessionUserId;
+                        console.log("onAuthStateChanged: User authenticated:", sessionUserId);
+                        isAuthReady = true; // Firebase Auth is ready for operations
+
+                        // Fetch all student data from the Python backend
+                        await fetchAllStudentsFromBackend();
+                        // Render the UI based on the current user's role (which is only 'lecturer' if they explicitly logged in)
+                        renderUI(); 
+                    } else {
+                        // User is signed out
+                        sessionUserId = null;
+                        currentUserIdSpan.textContent = 'Not authenticated';
+                        console.log("onAuthStateChanged: No user signed in.");
+                        currentUserRole = null; // Reset role if user logs out
+                        isAuthReady = false; // Auth is no longer ready
+                        renderUI(); // Re-render UI to show login
+                        // Clear any sensitive data or lists when no user is signed in
+                        allStudentsData = [];
+                        studentListLecturer.innerHTML = '<p class="text-gray-500 text-center">Please select filters to load students.</p>';
+                        studentAttendanceDisplay.classList.add('hidden');
+                    }
+                });
+
+                // Attempt initial sign-in.
+                // For Canvas environment, initialAuthToken might be provided.
+                // For local VS Code, we sign in anonymously to satisfy Firestore rules that require authentication.
+                console.log("Attempting initial Firebase sign-in...");
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                    console.log("signInWithCustomToken completed.");
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("signInAnonymously completed.");
+                }
+
+            } catch (error) {
+                console.error("Error initializing Firebase or authenticating:", error);
+                // Add specific guidance for the 'auth/admin-restricted-operation' error
+                if (error.code === 'auth/admin-restricted-operation') {
+                    showMessage(
+                        `Authentication error: ${error.message}. This usually means your 'firebaseConfig' is incorrect or Anonymous/Email-Password sign-in methods are not enabled in Firebase Console > Authentication.`,
+                        'error'
+                    );
+                } else {
+                    showMessage(`Error initializing app: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        /**
+         * Handles lecturer login using Email/Password.
+         */
+        loginBtn.addEventListener('click', async () => {
+            const email = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                showMessage('Please enter both email and password.', 'error');
+                return;
+            }
+
+            try {
+                // Use Firebase's signInWithEmailAndPassword method
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log("Firebase Email/Password Login successful:", userCredential.user.uid);
+                
+                // Set the current user's role to 'lecturer' upon successful login.
+                currentUserRole = 'lecturer';
+                showMessage('Logged in successfully as Lecturer!');
+                renderUI(); // Update UI to show lecturer section
+            } catch (error) {
+                console.error("Firebase Email/Password Login error:", error);
+                let errorMessage = 'Login failed. Please check your email and password.';
+                // Provide more specific error messages based on Firebase error codes
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'No user found with this email. Please register or check your email.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Incorrect password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email format.';
+                } else if (error.code === 'auth/admin-restricted-operation') {
+                    errorMessage = 'Authentication operation restricted. Please check your Firebase project settings and ensure Email/Password sign-in is enabled.';
+                }
+                showMessage(errorMessage, 'error');
+            }
+            passwordInput.value = ''; // Clear password field for security
+        });
+
+        /**
+         * Handles user logout.
+         */
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth); // Sign out the current Firebase user
+                currentUserRole = null; // Reset user role
+                showMessage('Logged out successfully.');
+                renderUI(); // Update UI to show login section
+            } catch (error) {
+                console.error("Error during logout:", error);
+                showMessage(`Error during logout: ${error.message}`, 'error');
+            }
+        });
+
+        // --- Student Data Management (Backend API Calls) ---
+
+        /**
+         * Fetches all student data from the Python Backend API.
+         * This data is then used to populate the lecturer's attendance marking list
+         * and to validate student IDs for attendance viewing.
+         */
+        async function fetchAllStudentsFromBackend() {
+            if (!isAuthReady) {
+                console.warn("fetchAllStudentsFromBackend: Firebase Auth not ready yet. Skipping fetch.");
+                return;
+            }
+            try {
+                // Make a GET request to your Flask backend's /api/students endpoint
+                const response = await fetch(`${BACKEND_URL}/api/students`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                allStudentsData = await response.json(); // Parse the JSON response
+                console.log("All students data fetched from backend:", allStudentsData);
+                // If a lecturer is logged in, refresh their student list
+                if (currentUserRole === 'lecturer') {
+                    loadStudentsForLecturer();
+                }
+            } catch (error) {
+                console.error("Error fetching students from backend:", error);
+                showMessage(`Error loading students from backend: ${error.message}. Please ensure your Python backend is running.`, 'error');
+            }
+        }
+
+        /**
+         * Handles CSV file upload by sending the file to the Python Backend API.
+         */
+        uploadCsvBtn.addEventListener('click', async () => {
+            if (currentUserRole !== 'lecturer' || !isAuthReady) {
+                showMessage('You must be logged in as a lecturer to upload student data.', 'error');
+                return;
+            }
+
+            const file = csvUploadInput.files[0];
+            if (!file) {
+                showMessage('Please select a CSV file to upload.', 'error');
+                return;
+            }
+
+            // Use FormData to send the file in a POST request
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Make a POST request to your Flask backend's /api/students/upload endpoint
+                const response = await fetch(`${BACKEND_URL}/api/students/upload`, {
+                    method: 'POST',
+                    body: formData // The FormData object contains the file
+                });
+
+                const result = await response.json(); // Parse the JSON response from the backend
+
+                if (response.ok) {
+                    showMessage(result.message);
+                    csvUploadInput.value = ''; // Clear the file input field
+                    await fetchAllStudentsFromBackend(); // Refresh student list after successful upload
+                } else {
+                    showMessage(`Upload failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                console.error("Error uploading CSV to backend:", error);
+                showMessage(`Error uploading CSV: ${error.message}. Please ensure your Python backend is running.`, 'error');
+            }
+        });
+
+        // --- Lecturer Functions ---
+
+        /**
+         * Loads and displays students in the lecturer's attendance marking section
+         * based on selected filters (Branch, Department, Section).
+         */
+        function loadStudentsForLecturer() {
+            studentListLecturer.innerHTML = '<p class="text-gray-500 text-center">Please select filters to load students.</p>'; // Default message
+
+            const selectedBranch = filterBranchSelect.value;
+            const selectedDepartment = filterDepartmentSelect.value;
+            const selectedSection = filterSectionSelect.value;
+
+            // Filter students from the 'allStudentsData' array (which comes from the backend)
+            const filteredStudents = allStudentsData.filter(student => {
+                return (selectedBranch === '' || student.branch === selectedBranch) &&
+                       (selectedDepartment === '' || student.department === selectedDepartment) &&
+                       (selectedSection === '' || student.section === selectedSection);
+            });
+
+            studentListLecturer.innerHTML = ''; // Clear previous list
+            if (filteredStudents.length === 0) {
+                studentListLecturer.innerHTML = '<p class="text-gray-500 text-center">No students found for the selected filters.</p>';
+                return;
+            }
+
+            // Dynamically create HTML elements for each filtered student
+            filteredStudents.forEach(student => {
+                const studentDiv = document.createElement('div');
+                studentDiv.className = 'student-item';
+                studentDiv.innerHTML = `
+                    <span>${student.name} (${student.rollNumber} - ${student.studentId})</span>
+                    <div>
+                        <input type="radio" id="present-${student.studentId}" name="attendance-${student.studentId}" value="present" class="mr-1">
+                        <label for="present-${student.studentId}" class="mr-4">Present</label>
+                        <input type="radio" id="absent-${student.studentId}" name="attendance-${student.studentId}" value="absent" class="mr-1">
+                        <label for="absent-${student.studentId}">Absent</label>
+                    </div>
+                `;
+                studentListLecturer.appendChild(studentDiv);
+            });
+        }
+
+        // Add event listeners to filter dropdowns to reload the student list when selections change
+        filterBranchSelect.addEventListener('change', loadStudentsForLecturer);
+        filterDepartmentSelect.addEventListener('change', loadStudentsForLecturer);
+        filterSectionSelect.addEventListener('change', loadStudentsForLecturer);
+
+        /**
+         * Saves the marked attendance for a class to Firestore.
+         */
+        saveAttendanceBtn.addEventListener('click', async () => {
+            if (currentUserRole !== 'lecturer' || !isAuthReady) {
+                showMessage('You must be logged in as a lecturer to save attendance.', 'error');
+                return;
+            }
+
+            const className = classNameInput.value.trim();
+            const attendanceDate = attendanceDateInput.value;
+            const selectedBranch = filterBranchSelect.value;
+            const selectedDepartment = filterDepartmentSelect.value;
+            const selectedSection = filterSectionSelect.value;
+
+            if (!className || !attendanceDate || !selectedBranch || !selectedDepartment || !selectedSection) {
+                showMessage('Please enter class name, date, and select Branch, Department, and Section.', 'error');
+                return;
+            }
+
+            const attendanceRecords = {};
+            let allMarked = true;
+
+            // Get all student elements currently displayed for attendance marking
+            const displayedStudentElements = studentListLecturer.querySelectorAll('.student-item');
+            if (displayedStudentElements.length === 0) {
+                showMessage('No students displayed to mark attendance for. Please select filters.', 'error');
+                return;
+            }
+
+            // Iterate through displayed students to get their attendance status
+            displayedStudentElements.forEach(studentDiv => {
+                // Extract studentId from the student item's text content
+                const studentIdMatch = studentDiv.querySelector('span').textContent.match(/ - ([^)]+)\)/);
+                const studentId = studentIdMatch ? studentIdMatch[1] : null;
+
+                if (!studentId) {
+                    console.error("Could not extract student ID from element:", studentDiv);
+                    allMarked = false; 
+                    return;
+                }
+
+                const presentRadio = studentDiv.querySelector(`#present-${studentId}`);
+                const absentRadio = studentDiv.querySelector(`#absent-${studentId}`);
+
+                if (presentRadio.checked) {
+                    attendanceRecords[studentId] = true; // true for present
+                } else if (absentRadio.checked) {
+                    attendanceRecords[studentId] = false; // false for absent
+                } else {
+                    allMarked = false; // If neither is checked, attendance is not marked
+                }
+            });
+
+            if (!allMarked) {
+                showMessage('Please mark attendance for all displayed students.', 'error');
+                return;
+            }
+
+            try {
+                // Construct a unique document ID for the attendance record
+                const docId = `${className}-${attendanceDate}-${selectedBranch}-${selectedDepartment}-${selectedSection}`;
+                // Reference to the specific attendance document in Firestore
+                const attendanceRef = doc(db, `artifacts/${appId}/public/data/attendance`, docId);
+                
+                // Set the attendance record in Firestore
+                await setDoc(attendanceRef, {
+                    className: className,
+                    date: attendanceDate,
+                    branch: selectedBranch,
+                    department: selectedDepartment,
+                    section: selectedSection,
+                    lecturerId: sessionUserId, // Record which lecturer marked it
+                    records: attendanceRecords, // The attendance status for each student
+                    timestamp: new Date() // Timestamp of when the record was saved
+                });
+                showMessage('Attendance saved successfully!');
+                console.log('Attendance saved:', { className, attendanceDate, selectedBranch, selectedDepartment, selectedSection, records: attendanceRecords });
+            } catch (e) {
+                console.error("Error saving attendance: ", e);
+                showMessage(`Error saving attendance: ${e.message}`, 'error');
+            }
+        });
+
+        // --- Student Functions ---
+
+        /**
+         * Views a student's attendance records and calculates their percentage.
+         */
+        viewAttendanceBtn.addEventListener('click', async () => {
+            if (!isAuthReady) {
+                showMessage('Please wait for authentication to complete before viewing attendance.', 'error');
+                return;
+            }
+
+            const studentId = studentIdInput.value.trim();
+            if (!studentId) {
+                showMessage('Please enter your Student ID.', 'error');
+                return;
+            }
+
+            // Check if the entered studentId exists in the fetched student data
+            const studentExists = allStudentsData.some(student => student.studentId === studentId);
+            if (!studentExists) {
+                showMessage('Student ID not found. Please enter a valid ID.', 'error');
+                studentAttendanceDisplay.classList.add('hidden'); // Hide display if ID is invalid
+                return;
+            }
+
+            // Show attendance display area and set loading messages
+            studentAttendanceDisplay.classList.remove('hidden');
+            attendancePercentage.textContent = 'Calculating...';
+            studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">Loading attendance records...</p>';
+
+            try {
+                // Query all attendance records from Firestore
+                const attendanceCollectionRef = collection(db, `artifacts/${appId}/public/data/attendance`);
+                const q = query(attendanceCollectionRef);
+
+                // Use onSnapshot to listen for real-time updates to attendance records
+                onSnapshot(q, (snapshot) => {
+                    let totalClasses = 0;
+                    let classesAttended = 0;
+                    const details = [];
+
+                    if (snapshot.empty) {
+                        studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">No attendance records found for this student.</p>';
+                        attendancePercentage.textContent = '0%';
+                        return;
+                    }
+
+                    // Iterate through all attendance documents
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        // Check if the current student's ID is in this attendance record
+                        if (data.records && data.records.hasOwnProperty(studentId)) {
+                            totalClasses++; // Increment total classes for this student
+                            const isPresent = data.records[studentId];
+                            if (isPresent) {
+                                classesAttended++; // Increment attended classes if present
+                            }
+                            // Store details for display
+                            details.push({
+                                className: data.className,
+                                date: data.date,
+                                branch: data.branch,
+                                department: data.department,
+                                section: data.section,
+                                status: isPresent ? 'Present' : 'Absent',
+                                isPresent: isPresent
+                            });
+                        }
+                    });
+
+                    // Sort attendance details by date for better readability
+                    details.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                    studentAttendanceDetails.innerHTML = ''; // Clear previous details
+                    if (details.length === 0) {
+                        studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">No attendance records found for this student.</p>';
+                        attendancePercentage.textContent = '0%';
+                    } else {
+                        // Display each attendance record
+                        details.forEach(record => {
+                            const detailDiv = document.createElement('div');
+                            detailDiv.className = 'student-item';
+                            detailDiv.innerHTML = `
+                                <span>${record.className} (${record.branch}-${record.section}) - ${record.date}</span>
+                                <span class="attendance-status ${record.isPresent ? 'present' : 'absent'}">${record.status}</span>
+                            `;
+                            studentAttendanceDetails.appendChild(detailDiv);
+                        });
+
+                        // Calculate and display attendance percentage
+                        const percentage = totalClasses > 0 ? ((classesAttended / totalClasses) * 100).toFixed(2) : 0;
+                        attendancePercentage.textContent = `${percentage}%`;
+                    }
+                }, (error) => {
+                    // Handle Firestore permission errors specifically
+                    if (error.code === 'permission-denied') {
+                        showMessage('Permission denied to access attendance data. Please check your Firestore Security Rules. Ensure `allow read: if request.auth != null;` for `artifacts/{appId}/public/data/attendance`.', 'error');
+                        console.error("Firestore Security Rule Error: Missing or insufficient permissions for 'attendance' collection. Ensure rules allow authenticated read access to artifacts/{appId}/public/data/attendance.", error);
+                    } else {
+                        showMessage(`Error fetching attendance: ${error.message}`, 'error');
+                        console.error("Error fetching student attendance with onSnapshot:", error);
+                    }
+                });
+
+            } catch (e) {
+                console.error("Error setting up attendance listener:", e);
+                showMessage(`Error setting up attendance listener: ${e.message}`, 'error');
+                attendancePercentage.textContent = '--%';
+                studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">Error loading attendance.</p>';
+            }
+        });
+
+        // --- Initial Setup ---
+
+        // Set today's date as default for the attendance date input field
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed (0-11)
+        const dd = String(today.getDate()).padStart(2, '0');
+        attendanceDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+        // Initialize Firebase and start the app when the window has fully loaded
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
