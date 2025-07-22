@@ -119,6 +119,9 @@ Save index.html.
 
 Run the Frontend:
 
+pip install flask-cors
+pip install Flask firebase-admin pandas flask-cors
+
 If you have the VS Code Live Server extension, right-click index.html in the VS Code Explorer and select "Open with Live Server".
 Alternatively, open the index.html file directly in your web browser (e.g., by dragging it into the browser window). The URL will typically be file:///.../index.html or http://127.0.0.1:5500/index.html if using Live Server.
 Note: Using Live Server (http://127.0.0.1:5500) is recommended as it correctly simulates a web server environment, which is important for network requests to your Flask backend.
