@@ -1,1081 +1,893 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Attendance System</title>
-    <!-- Tailwind CSS CDN for modern styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter for a clean font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Base styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 2rem 1rem;
-            box-sizing: border-box;
-        }
-        /* Main container for the app */
-        .container {
-            max-width: 1100px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 2.5rem;
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
-        }
-        /* Styling for section titles */
-        .section-title {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #1a202c;
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-        /* Input field grouping */
-        .input-group {
-            margin-bottom: 1.25rem;
-        }
-        /* General input styling */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="date"],
-        select {
-            display: block;
-            width: 100%;
-            padding: 0.85rem 1.25rem;
-            border-radius: 0.75rem;
-            border: 1px solid #cbd5e0;
-            background-color: #f8fafc;
-            font-size: 1rem;
-            color: #374151;
-            transition: all 0.2s ease-in-out;
-            outline: none;
-        }
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        input[type="date"]:focus,
-        select:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-            background-color: #ffffff;
-        }
-        /* Specific styling for file input */
-        input[type="file"] {
-            border: 1px dashed #a7b7cd;
-            background-color: #f0f4f8;
-            padding: 1.25rem 1.25rem;
-            cursor: pointer;
-        }
-        input[type="file"]::-webkit-file-upload-button {
-            visibility: hidden;
-            width: 0;
-            padding: 0;
-            margin: 0;
-        }
-        input[type="file"]::before {
-            content: 'Choose CSV File(s)';
-            display: inline-block;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            outline: none;
-            white-space: nowrap;
-            -webkit-user-select: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            margin-right: 1rem;
-            transition: background-color 0.2s ease-in-out;
-        }
-        input[type="file"]:hover::before {
-            background-color: #2563eb;
-        }
-
-        /* General button styling */
-        .btn {
-            padding: 0.85rem 2rem;
-            border-radius: 0.75rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        /* Primary button styling */
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
-        }
-        .btn-primary:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
-        }
-        .btn-primary:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
-        }
-        /* Secondary button styling */
-        .btn-secondary {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            border: 1px solid #cbd5e0;
-        }
-        .btn-secondary:hover {
-            background-color: #cbd5e0;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
-        }
-        .btn-secondary:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Message box for success/error alerts */
-        .message-box {
-            padding: 1rem 1.5rem;
-            margin-top: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 0.75rem;
-            font-weight: 600;
-            text-align: center;
-            border: 1px solid;
-            animation: fadeInOut 5s forwards;
-        }
-        .message-success {
-            background-color: #d1fae5;
-            color: #047857;
-            border-color: #34d399;
-        }
-        .message-error {
-            background-color: #fee2e2;
-            color: #dc2626;
-            border-color: #ef4444;
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-10px); }
-            10% { opacity: 1; transform: translateY(0); }
-            90% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-10px); }
-        }
-
-        /* Styling for section card blocks */
-        .section-card {
-            padding: 2.5rem;
-            border-radius: 1.25rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2.5rem;
-        }
-        .login-card {
-            background-color: #fcfcfc;
-            border: 1px solid #e0e0e0;
-        }
-        .lecturer-card {
-            background: linear-gradient(135deg, #e0f2fe 0%, #ceeefc 100%);
-            border: 1px solid #a7d9f7;
-        }
-        .student-card {
-            background: linear-gradient(135deg, #e6ffe6 0%, #ccffcc 100%);
-            border: 1px solid #82e293;
-        }
-
-        /* Table styles */
-        .attendance-table-container {
-            overflow-x: auto;
-            max-height: 600px;
-        }
-        .attendance-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.875rem;
-        }
-        .attendance-table th, .attendance-table td {
-            padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .attendance-table thead th {
-            background-color: #e2e8f0;
-            color: #4a5568;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        .attendance-table tbody tr:nth-child(odd) {
-            background-color: #f7fafc;
-        }
-        .attendance-table tbody tr:hover {
-            background-color: #eef2f6;
-        }
-        .attendance-table .present {
-            color: #059669;
-            font-weight: 600;
-        }
-        .attendance-table .absent {
-            color: #dc2626;
-            font-weight: 600;
-        }
-        .attendance-table td:first-child, .attendance-table th:first-child {
-            position: sticky;
-            left: 0;
-            background-color: inherit;
-            z-index: 10;
-        }
-        .attendance-table th:first-child {
-            background-color: #e2e8f0;
-        }
-        .attendance-table td:first-child {
-            background-color: #f7fafc;
-        }
-        /* Radio button styling */
-        .radio-btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-        }
-        .radio-btn-group label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-        .radio-btn-group input[type="radio"] {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            width: 1rem;
-            height: 1rem;
-            border-radius: 50%;
-            border: 2px solid #94a3b8;
-            outline: none;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer;
-        }
-        .radio-btn-group input[type="radio"]:checked {
-            background-color: #3b82f6;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-            }
-            .section-title {
-                font-size: 1.75rem;
-            }
-            .section-card {
-                padding: 1.5rem;
-            }
-            .grid-cols-1-md-grid-cols-2 {
-                grid-template-columns: 1fr;
-            }
-            .btn {
-                padding: 0.75rem 1.5rem;
-                font-size: 0.9rem;
-            }
-            input[type="file"]::before {
-                font-size: 0.9rem;
-                padding: 0.6rem 1.2rem;
-            }
-            .attendance-table td {
-                padding: 0.5rem;
-            }
-            .attendance-table th {
-                padding: 0.5rem;
-                font-size: 0.75rem;
-            }
-            .radio-btn-group {
-                gap: 0.5rem;
-            }
-        }
-    </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Online Attendance System </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #004aad;
+      --primary-dark: #003580;
+      --accent: #00bfa6;
+      --bg-light: #f4f8ff;
+      --text-dark: #1e293b;
+      --text-gray: #475569;
+      --card-bg: #ffffff;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(180deg, #e7efff 0%, #f8fbff 100%);
+      padding: 2rem;
+      color: var(--text-dark);
+      min-height: 100vh;
+    }
+    .container {
+      background: var(--card-bg);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      max-width: 1150px;
+      margin: auto;
+      box-shadow: 0 8px 35px rgba(0, 74, 173, 0.15);
+      border: 1px solid #e0ecff;
+    }
+    .college-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .college-header img {
+      height: 80px;
+      width: 80px;
+      border-radius: 12px;
+      border: 2px solid var(--primary);
+      background: #fff;
+      object-fit: contain;
+      padding: 4px;
+    }
+    .college-title h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+      line-height: 1.2;
+    }
+    .college-title p {
+      margin: 0;
+      color: var(--text-gray);
+      font-size: 0.88rem;
+    }
+    .section-title {
+      text-align: center;
+      color: var(--primary-dark);
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 1rem 0 1.5rem;
+    }
+    .card {
+      background: #ffffff;
+      border-radius: 1rem;
+      border: 1px solid #e4ecf8;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 16px rgba(0, 74, 173, 0.05);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 1.2rem;
+      border-radius: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: white;
+      background: var(--primary);
+      border: none;
+      transition: all 0.25s ease-in-out;
+    }
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(0, 74, 173, 0.3);
+    }
+    .btn.secondary {
+      background: #e3edff;
+      color: var(--primary-dark);
+      border: 1px solid #bcd0ff;
+    }
+    .btn.secondary:hover {
+      background: var(--primary);
+      color: white;
+    }
+    .input, select, input[type=text], input[type=email], input[type=password], input[type=date] {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid #d2dff7;
+      background: #f8fbff;
+      transition: 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(0, 74, 173, 0.15);
+      outline: none;
+      background: white;
+    }
+    .message-box {
+      border-radius: 0.75rem;
+      text-align: center;
+      padding: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .msg-success { background: #e6f8f2; color: #046c4e; border: 1px solid #32d399; }
+    .msg-error { background: #ffecec; color: #b91c1c; border: 1px solid #fca5a5; }
+    .attendance-table th {
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .attendance-table td, .attendance-table th {
+      border: 1px solid #e3ebfa;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .attendance-table tr:nth-child(even) { background: #f9fbff; }
+    .present { color: #059669; font-weight: 700; }
+    .absent { color: #dc2626; font-weight: 700; }
+    .section-subtitle {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .hidden { display: none; }
+    .small { font-size: 0.85rem; color: var(--text-gray); }
+  </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="container">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mb-6">Online Attendance System</h1>
-
-        <!-- User ID and Logout Button (visible only when a lecturer is logged in) -->
-        <div id="user-info-section" class="flex flex-col sm:flex-row justify-center items-center text-sm text-gray-600 mb-6 py-3 px-4 bg-gray-50 rounded-lg shadow-sm hidden">
-            <span class="mb-2 sm:mb-0 sm:mr-4">Your Session User ID: <span id="current-user-id" class="font-mono text-blue-600 font-semibold">Loading...</span></span>
-            <button id="logout-btn" class="btn btn-secondary !py-2 !px-4 !text-sm">Logout</button>
-        </div>
-
-        <!-- Message Box for displaying success/error messages to the user -->
-        <div id="message-box" class="message-box hidden"></div>
-
-        <!-- Lecturer Login Section -->
-        <div id="login-section" class="section-card login-card">
-            <h2 class="section-title text-gray-800">Lecturer Login</h2>
-            <div class="input-group">
-                <label for="username-input" class="block text-gray-700 text-sm font-semibold mb-2">Email:</label>
-                <input type="email" id="username-input" placeholder="e.g., your_lecturer_email@example.com" class="focus:ring-blue-500">
-            </div>
-            <div class="input-group mb-4">
-                <label for="password-input" class="block text-gray-700 text-sm font-semibold mb-2">Password:</label>
-                <input type="password" id="password-input" placeholder="Enter password" class="focus:ring-blue-500">
-            </div>
-            <button id="login-btn" class="btn btn-primary w-full">Login</button>
-            <p class="text-sm text-gray-600 mt-6 text-center leading-relaxed">
-                To log in, use an email and password registered in your Firebase project's Authentication section.
-                You can add users in Firebase Console &gt; Authentication &gt; Users.
-            </p>
-        </div>
-
-        <!-- Lecturer Portal Section -->
-        <div id="lecturer-section" class="section-card lecturer-card hidden">
-            <h2 class="section-title text-blue-700">Lecturer Portal</h2>
-
-            <!-- Bulk Upload Students -->
-            <div class="mb-8 p-6 bg-blue-50 rounded-xl shadow-inner border border-blue-200">
-                <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">Upload Student Data</h3>
-                <p class="text-sm text-gray-700 mb-4 leading-relaxed">
-                    Upload a CSV file with these exact column headers: <br>
-                    <code class="font-mono bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs">studentId,rollNumber,name,branch,section,academicYear</code>
-                </p>
-                <input type="file" id="csv-upload-input" accept=".csv" multiple/>
-                <button id="upload-csv-btn" class="btn btn-primary w-full mt-6">Upload Students from CSV</button>
-            </div>
-
-            <!-- Mark Attendance Section -->
-            <div class="mb-8 p-6 bg-green-50 rounded-xl shadow-inner border border-green-200">
-                <h3 class="text-xl font-bold text-green-800 mb-4 text-center">Mark Today's Attendance</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="input-group">
-                        <label for="class-name" class="block text-gray-700 text-sm font-semibold mb-2">Class Name:</label>
-                        <input type="text" id="class-name" placeholder="e.g., Eng. Math I" class="focus:ring-green-500">
-                    </div>
-                    <div class="input-group">
-                        <label for="attendance-date" class="block text-gray-700 text-sm font-semibold mb-2">Date:</label>
-                        <input type="date" id="attendance-date" class="focus:ring-green-500">
-                    </div>
-                    <div class="input-group">
-                        <label for="filter-branch-mark" class="block text-gray-700 text-sm font-semibold mb-2">Branch:</label>
-                        <select id="filter-branch-mark" class="focus:ring-green-500">
-                            <option value="">Select Branch</option>
-                            <option value="CSE">CSE</option>
-                            <option value="ECE">ECE</option>
-                            <option value="MECH">MECH</option>
-                            <option value="CIVIL">CIVIL</option>
-                            <option value="EEE">EEE</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="filter-section-mark" class="block text-gray-700 text-sm font-semibold mb-2">Section:</label>
-                        <select id="filter-section-mark" class="focus:ring-green-500">
-                            <option value="">Select Section</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                        </select>
-                    </div>
-                    <div class="input-group col-span-1 md:col-span-2">
-                        <label for="filter-academic-year-mark" class="block text-gray-700 text-sm font-semibold mb-2">Academic Year:</label>
-                        <select id="filter-academic-year-mark" class="focus:ring-green-500">
-                            <option value="">Select Year</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="attendanceTableContainer" class="overflow-x-auto rounded-lg shadow-sm">
-                    <table class="attendance-table">
-                        <thead>
-                            <tr>
-                                <th class="w-1/2 text-left">Student Name (ID)</th>
-                                <th class="text-center">Present</th>
-                                <th class="text-center">Absent</th>
-                            </tr>
-                        </thead>
-                        <tbody id="attendanceTableBody">
-                            <!-- Student data will be loaded here -->
-                        </tbody>
-                    </table>
-                </div>
-                <button id="save-attendance-btn" class="btn btn-primary !bg-green-600 w-full mt-6">Save Attendance</button>
-            </div>
-
-            <!-- View Historical Attendance Section -->
-            <div class="p-6 bg-indigo-50 rounded-xl shadow-inner border border-indigo-200">
-                <h3 class="text-xl font-bold text-indigo-800 mb-4 text-center">View Historical Attendance</h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="input-group md:col-span-1">
-                        <label for="filter-branch-history" class="block text-gray-700 text-sm font-semibold mb-2">Branch:</label>
-                        <select id="filter-branch-history" class="focus:ring-indigo-500">
-                            <option value="">Select Branch</option>
-                            <option value="CSE">CSE</option>
-                            <option value="ECE">ECE</option>
-                            <option value="MECH">MECH</option>
-                            <option value="CIVIL">CIVIL</option>
-                            <option value="EEE">EEE</option>
-                        </select>
-                    </div>
-                    <div class="input-group md:col-span-1">
-                        <label for="filter-section-history" class="block text-gray-700 text-sm font-semibold mb-2">Section:</label>
-                        <select id="filter-section-history" class="focus:ring-indigo-500">
-                            <option value="">Select Section</option>
-                            <option value="A">A</option>
-                            <option value="B">B</option>
-                            <option value="C">C</option>
-                        </select>
-                    </div>
-                    <div class="input-group md:col-span-2">
-                        <label for="class-name-history" class="block text-gray-700 text-sm font-semibold mb-2">Class Name:</label>
-                        <input type="text" id="class-name-history" placeholder="e.g., Eng. Math I" class="focus:ring-indigo-500">
-                    </div>
-                </div>
-                <button id="view-historical-attendance-btn" class="btn btn-primary w-full">View Historical Data</button>
-                <div id="historical-attendance-display" class="space-y-3 mt-6">
-                    <p class="text-gray-500 text-center">Select a class to view attendance history in a table.</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Student Portal Section (Always visible) -->
-        <div id="student-section" class="section-card student-card">
-            <h2 class="section-title text-green-700">Student Portal (Free Access)</h2>
-            <div id="student-auth-status" class="text-center text-base text-gray-600 mb-6 py-2">
-                Initializing student access...
-            </div>
-            <div id="student-input-area" class="hidden">
-                <div class="input-group">
-                    <label for="student-id-input" class="block text-gray-700 text-sm font-semibold mb-2">Your Student ID:</label>
-                    <input type="text" id="student-id-input" placeholder="Enter your ID (e.g., CSE-a-2-123)" class="focus:ring-green-500">
-                </div>
-                <button id="view-attendance-btn" class="btn btn-primary !bg-green-600 hover:!bg-green-700 w-full mb-6">View My Attendance</button>
-                <div id="student-details-table" class="hidden mb-6">
-  <h3 class="text-xl font-bold text-gray-800 mb-3 text-center">Your Details:</h3>
-  <table class="attendance-table shadow rounded-lg w-full">
-    <tbody id="student-details-body">
-      <!-- Student details will load here -->
-    </tbody>
-  </table>
-</div>
-
-            </div>
-            <div id="student-attendance-display" class="hidden">
-                <h3 class="text-xl font-bold text-gray-800 mb-3 text-center">Your Attendance Summary:</h3>
-                <p id="attendance-percentage" class="text-4xl font-extrabold text-blue-700 mb-6 bg-blue-50 py-4 rounded-xl shadow-md border border-blue-200">--%</p>
-                <h3 class="text-xl font-bold text-gray-800 mb-3 text-center">Your Attendance Details:</h3>
-                <div id="student-attendance-details" class="space-y-3 p-4 bg-white rounded-xl shadow-inner border border-gray-200 min-h-[100px] flex items-center justify-center flex-col">
-                    <p class="text-gray-500 text-center">No attendance records found.</p>
-                </div>
-            </div>
-        </div>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="college-header">
+      <img src="gvplogo.png" alt="GVP Logo" onerror="this.style.display='none'">
+      <div class="college-title">
+        <h2>GAYATRI VIDYA PARISHAD COLLEGE FOR DEGREE AND PG COURSES (AUTONOMOUS)</h2>
+        <p>(Affiliated to Andhra University | Accredited by NAAC with 'A' Grade)</p>
+        <p>(MBA and UG Engineering B.Tech(CE, CSE, ECE and ME) programs are Accredited by NBA)</p>
+        <p>Visakhapatnam - 530045</p>
+      </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, writeBatch, getDocs, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <h1 class="section-title">Online Attendance System</h1>
 
-        setLogLevel('debug');
+    <!-- Message -->
+    <div id="message-box" class="hidden message-box"></div>
 
-        // --- Firebase Globals & Initialization ---
-        const firebaseConfig = {
-          apiKey: "AIzaSyCZw-psITQ1bgw1nl7HnG56Q9F-c6nH-F8",
-          authDomain: "attendance-3f978.firebaseapp.com",
-          projectId: "attendance-3f978",
-          storageBucket: "attendance-3f978.firebasestorage.app",
-          messagingSenderId: "385341970643",
-          appId: "1:385341970643:web:e8aaa51b8b22f93588dc26",
-          measurementId: "G-HD45MB18DJ"
-        };
-        const BACKEND_URL = 'http://127.0.0.1:5000';
+    <!-- Unified Login Card -->
+    <div id="login-card" class="card">
+      <h3 style="font-size:1.25rem;font-weight:800;margin-bottom:12px;text-align:center">Sign in</h3>
 
-        // --- Defensive declarations to fix ReferenceErrors seen in console ---
-        const appId = (firebaseConfig && firebaseConfig.projectId) ? firebaseConfig.projectId : 'attendance-3f978';
-        let initialAuthToken = null;
+      <div style="max-width:720px;margin:0 auto">
+        <div style="display:grid;gap:12px">
+          <div>
+            <label class="small">Role</label>
+            <select id="role-select" class="input">
+              <option value="">Select role</option>
+              <option value="lecturer">Lecturer</option>
+              <option value="student">Student</option>
+            </select>
+          </div>
 
-        let app;
-        let db;
-        let auth;
-        let sessionUserId = null;
-        let currentUserRole = null;
-        let allStudentsData = [];
-        let isAuthReady = false;
-        let hasFetchedStudentsInitially = false;
+          <!-- Lecturer fields -->
+          <div id="lecturer-fields" class="hidden">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+              <div><label class="small">Email</label><input id="lecturer-email" type="email" class="input" placeholder="lecturer@college.edu" /></div>
+              <div><label class="small">Password</label><input id="lecturer-password" type="password" class="input" placeholder="password" /></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="login-lecturer-btn" class="btn">Sign in as Lecturer</button>
+            </div>
+          </div>
 
-        // --- DOM Element References ---
-        const userInfoSection = document.getElementById('user-info-section');
-        const currentUserIdSpan = document.getElementById('current-user-id');
-        const logoutBtn = document.getElementById('logout-btn');
-        const messageBox = document.getElementById('message-box');
+          <!-- Student fields -->
+          <div id="student-fields" class="hidden">
+            <div style="display:flex;gap:8px;max-width:520px">
+              <input id="student-id-input" class="input" placeholder="Enter your Student ID or Roll" />
+              <button id="login-student-btn" class="btn">Sign in as Student</button>
+            </div>
+            <p class="small">Student sign-in is a quick local lookup (requires backend students list).</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        const loginSection = document.getElementById('login-section');
-        const usernameInput = document.getElementById('username-input');
-        const passwordInput = document.getElementById('password-input');
-        const loginBtn = document.getElementById('login-btn');
+    <!-- Lecturer Portal -->
+    <div id="lecturer-portal" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h3 style="font-size:1.25rem;font-weight:800;color:#0f172a">Lecturer Portal</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="small" id="lecturer-userinfo">User: —</span>
+          <button id="logout-btn" class="btn secondary">Logout</button>
+        </div>
+      </div>
 
-        const lecturerSection = document.getElementById('lecturer-section');
-        const classNameInput = document.getElementById('class-name');
-        const attendanceDateInput = document.getElementById('attendance-date');
-        const studentListLecturer = document.getElementById('student-list-lecturer');
-        const saveAttendanceBtn = document.getElementById('save-attendance-btn');
+      <hr style="margin:12px 0;border:none;border-top:1px solid #eef3fb"/>
 
-        const filterBranchMarkSelect = document.getElementById('filter-branch-mark');
-        const filterSectionMarkSelect = document.getElementById('filter-section-mark');
-        const filterAcademicYearMarkSelect = document.getElementById('filter-academic-year-mark');
+      <!-- Upload CSV -->
+      <div style="margin-bottom:12px" class="card">
+        <h4 style="font-weight:800;margin-bottom:8px">Upload Students CSV</h4>
+        <p class="small">CSV must include headers: <code>studentId,rollNumber,name,branch,section,academicYear</code></p>
+        <input type="file" id="csv-upload" accept=".csv" multiple/>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button id="upload-csv-btn" class="btn">Upload CSV(s)</button>
+          <button id="refresh-students-btn" class="btn secondary">Refresh Student List</button>
+        </div>
+      </div>
 
-        const csvUploadInput = document.getElementById('csv-upload-input');
-        const uploadCsvBtn = document.getElementById('upload-csv-btn');
+      <!-- Add Student -->
+      <div style="margin-bottom:12px" class="card">
+        <h4 style="font-weight:800;margin-bottom:8px">Add Student</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+          <div><label class="small">Student ID</label><input id="add-studentId" class="input" /></div>
+          <div><label class="small">Roll Number</label><input id="add-roll" class="input" /></div>
+          <div><label class="small">Name</label><input id="add-name" class="input" /></div>
+          <div><label class="small">Branch</label><input id="add-branch" class="input" /></div>
+          <div><label class="small">Section</label><input id="add-section" class="input" /></div>
+          <div><label class="small">Academic Year</label><input id="add-year" class="input" /></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button id="add-student-btn" class="btn">Add Student</button>
+        </div>
+      </div>
 
-        const filterBranchHistorySelect = document.getElementById('filter-branch-history');
-        const filterSectionHistorySelect = document.getElementById('filter-section-history');
-        const classNameHistoryInput = document.getElementById('class-name-history');
-        const viewHistoricalAttendanceBtn = document.getElementById('view-historical-attendance-btn');
-        const historicalAttendanceDisplay = document.getElementById('historical-attendance-display');
+      <!-- Manage Students Table -->
+      <div style="margin-bottom:12px" class="card">
+        <h4 style="font-weight:800;margin-bottom:8px">Manage Students</h4>
+        <div style="overflow-x:auto;max-height:280px">
+          <table class="attendance-table" id="students-table" style="width:100%">
+            <thead><tr><th>Action</th><th>Roll</th><th>Student ID</th><th>Name</th><th>Branch</th><th>Section</th><th>Year</th></tr></thead>
+            <tbody id="students-tbody"></tbody>
+          </table>
+        </div>
+      </div>
 
-        const studentSection = document.getElementById('student-section');
-        const studentAuthStatus = document.getElementById('student-auth-status');
-        const studentInputArea = document.getElementById('student-input-area');
-        const studentIdInput = document.getElementById('student-id-input');
-        const viewAttendanceBtn = document.getElementById('view-attendance-btn');
-        const studentAttendanceDisplay = document.getElementById('student-attendance-display');
-        const attendancePercentage = document.getElementById('attendance-percentage');
-        const studentAttendanceDetails = document.getElementById('student-attendance-details');
+      <!-- Mark Attendance -->
+      <div style="margin-bottom:12px" class="card">
+        <h4 style="font-weight:800;margin-bottom:8px">Mark Attendance</h4>
 
-        const attendanceTableBody = document.getElementById('attendanceTableBody');
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:8px">
+          <div><label class="small">Branch</label><select id="filter-branch-mark" class="input"><option value="">Select</option><option value="CSE">CSE</option><option value="ECE">ECE</option><option value="MECH">MECH</option><option value="CIVIL">CIVIL</option><option value="EEE">EEE</option></select></div>
+          <div><label class="small">Section</label><select id="filter-section-mark" class="input"><option value="">Select</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+          <div><label class="small">Academic Year</label><select id="filter-year-mark" class="input"><option value="">Select</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div><label class="small">Class Name</label><input id="class-name" class="input" placeholder="Enter class name" /></div>
+          <div><label class="small">Date</label><input id="attendance-date" type="date" class="input" /></div>
+        </div>
 
-        // --- Utility Functions ---
-        function showMessage(message, type = 'success') {
-            if (!messageBox) return;
-            messageBox.textContent = message;
-            messageBox.className = `message-box ${type === 'success' ? 'message-success' : 'message-error'}`;
-            messageBox.classList.remove('hidden');
-            // auto-hide after a short delay
-            setTimeout(()=> {
-                if (messageBox) messageBox.classList.add('hidden');
-            }, 5500);
+        <div style="overflow-x:auto" id="attendance-list-container">
+          <table class="attendance-table" id="attendance-mark-table" style="width:100%">
+            <thead><tr><th>Roll</th><th>Name</th><th>Attendance</th></tr></thead>
+            <tbody id="attendance-list-body"></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button id="save-attendance-btn" class="btn">Save Attendance</button>
+        </div>
+      </div>
+
+      <!-- Historical Attendance -->
+      <div style="margin-bottom:12px" class="card">
+        <h4 style="font-weight:800;margin-bottom:8px">View Historical Attendance</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:8px">
+          <div><label class="small">Branch</label><select id="filter-branch-history" class="input"><option value="">Select</option><option value="CSE">CSE</option><option value="ECE">ECE</option><option value="MECH">MECH</option><option value="CIVIL">CIVIL</option><option value="EEE">EEE</option></select></div>
+          <div><label class="small">Section</label><select id="filter-section-history" class="input"><option value="">Select</option><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
+          <div><label class="small">Academic Year</label><select id="filter-year-history" class="input"><option value="">Select</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+          <div style="grid-column:span 2"><label class="small">Class Name</label><input id="class-name-history" class="input" placeholder="Enter class name"/></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="view-history-btn" class="btn">View History</button>
+        </div>
+        <div id="history-display" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- Student Portal -->
+    <div id="student-portal" class="card hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <h3 style="font-size:1.25rem;font-weight:800;color:#064e3b">Student Portal</h3>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span class="small" id="student-userinfo">Student: —</span>
+          <button id="student-logout-btn" class="btn secondary">Logout</button>
+        </div>
+      </div>
+
+      <hr style="margin:12px 0;border:none;border-top:1px solid #eef3fb"/>
+
+      <div id="student-input-area">
+        <div style="display:flex;gap:10px;max-width:600px;margin:0 auto">
+          <input id="student-portal-id" class="input" placeholder="Enter your Student ID"/>
+          <button id="student-view-btn" class="btn">View My Attendance</button>
+        </div>
+        <p class="small" style="text-align:center;margin-top:8px">If you logged in as student, your ID will be prefilled.</p>
+      </div>
+
+      <div id="student-details" class="hidden" style="margin-top:12px">
+        <h4 style="font-weight:800">Your Details</h4>
+        <table class="attendance-table" style="width:100%;margin-bottom:12px">
+          <tbody id="student-details-body"></tbody>
+        </table>
+
+        <h4 style="font-weight:800">Attendance Summary</h4>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <div><strong class="small">Overall %:</strong> <span id="student-att-perc">0%</span></div>
+        </div>
+
+        <h4 style="font-weight:800;margin-top:12px">Attendance Records</h4>
+        <div id="student-att-list" style="margin-top:8px"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase + App Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- Firebase config (user requested to include) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZw-psITQ1bgw1nl7HnG56Q9F-c6nH-F8",
+      authDomain: "attendance-3f978.firebaseapp.com",
+      projectId: "attendance-3f978",
+      storageBucket: "attendance-3f978.firebasestorage.app",
+      messagingSenderId: "385341970643",
+      appId: "1:385341970643:web:e8aaa51b8b22f93588dc26",
+      measurementId: "G-HD45MB18DJ"
+    };
+
+    // Backend
+    const BACKEND_URL = 'http://127.0.0.1:5000';
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const appId = firebaseConfig.projectId || 'attendance-3f978';
+
+    // --- UI refs ---
+    const roleSelect = document.getElementById('role-select');
+    const lecturerFields = document.getElementById('lecturer-fields');
+    const studentFields = document.getElementById('student-fields');
+
+    const loginLectBtn = document.getElementById('login-lecturer-btn');
+    const loginStudentBtn = document.getElementById('login-student-btn');
+
+    const messageBox = document.getElementById('message-box');
+
+    const lecturerPortal = document.getElementById('lecturer-portal');
+    const studentPortal = document.getElementById('student-portal');
+    const loginCard = document.getElementById('login-card');
+
+    const lecturerUserinfo = document.getElementById('lecturer-userinfo');
+    const studentUserinfo = document.getElementById('student-userinfo');
+
+    const logoutBtn = document.getElementById('logout-btn');
+    const studentLogoutBtn = document.getElementById('student-logout-btn');
+
+    // Lecturer elements
+    const csvUploadInput = document.getElementById('csv-upload');
+    const uploadCsvBtn = document.getElementById('upload-csv-btn');
+    const refreshStudentsBtn = document.getElementById('refresh-students-btn');
+    const studentsTbody = document.getElementById('students-tbody');
+
+    const addStudentIdInput = document.getElementById('add-studentId');
+    const addRollInput = document.getElementById('add-roll');
+    const addNameInput = document.getElementById('add-name');
+    const addBranchInput = document.getElementById('add-branch');
+    const addSectionInput = document.getElementById('add-section');
+    const addYearInput = document.getElementById('add-year');
+    const addStudentBtn = document.getElementById('add-student-btn');
+
+    const filterBranchMark = document.getElementById('filter-branch-mark');
+    const filterSectionMark = document.getElementById('filter-section-mark');
+    const filterYearMark = document.getElementById('filter-year-mark');
+    const classNameInput = document.getElementById('class-name');
+    const attendanceDateInput = document.getElementById('attendance-date');
+    const attendanceListBody = document.getElementById('attendance-list-body');
+    const saveAttendanceBtn = document.getElementById('save-attendance-btn');
+
+    const filterBranchHistory = document.getElementById('filter-branch-history');
+    const filterSectionHistory = document.getElementById('filter-section-history');
+    const filterYearHistory = document.getElementById('filter-year-history');
+    const classNameHistory = document.getElementById('class-name-history');
+    const viewHistoryBtn = document.getElementById('view-history-btn');
+    const historyDisplay = document.getElementById('history-display');
+
+    // Student elements
+    const studentPortalId = document.getElementById('student-portal-id');
+    const studentViewBtn = document.getElementById('student-view-btn');
+    const studentDetailsSection = document.getElementById('student-details');
+    const studentDetailsBody = document.getElementById('student-details-body');
+    const studentAttPerc = document.getElementById('student-att-perc');
+    const studentAttList = document.getElementById('student-att-list');
+
+    // state
+    let allStudents = [];
+    let currentUserRole = null;
+    let sessionUserId = null; // firebase uid or 'student:<id>'
+
+    // Helper - show message
+    function showMessage(msg, type = 'success') {
+      messageBox.textContent = msg;
+      messageBox.className = `message-box ${type === 'success' ? 'msg-success' : 'msg-error'}`;
+      messageBox.classList.remove('hidden');
+      setTimeout(()=> { messageBox.classList.add('hidden'); }, 5000);
+    }
+
+    roleSelect.addEventListener('change', () => {
+      const r = roleSelect.value;
+      if (r === 'lecturer') { lecturerFields.classList.remove('hidden'); studentFields.classList.add('hidden'); }
+      else if (r === 'student') { studentFields.classList.remove('hidden'); lecturerFields.classList.add('hidden'); }
+      else { lecturerFields.classList.add('hidden'); studentFields.classList.add('hidden'); }
+    });
+
+    // Initialize date input to today
+    (function setToday() {
+      const t = new Date();
+      const yyyy = t.getFullYear();
+      const mm = String(t.getMonth()+1).padStart(2,'0');
+      const dd = String(t.getDate()).padStart(2,'0');
+      attendanceDateInput.value = `${yyyy}-${mm}-${dd}`;
+    })();
+
+    // Fetch all students from backend
+    async function fetchAllStudents() {
+      try {
+        const resp = await fetch(`${BACKEND_URL}/api/students`);
+        if (!resp.ok) throw new Error('Failed to fetch students from backend');
+        const data = await resp.json();
+        allStudents = data || [];
+        populateStudentsTable();
+        return allStudents;
+      } catch (err) {
+        console.error("fetchAllStudents error:", err);
+        showMessage('Error loading students from backend. Is the Flask server running?', 'error');
+        allStudents = [];
+        populateStudentsTable();
+      }
+    }
+
+    function populateStudentsTable() {
+      studentsTbody.innerHTML = '';
+      if (!allStudents || allStudents.length === 0) {
+        studentsTbody.innerHTML = '<tr><td colspan="7" class="small">No students found.</td></tr>';
+        return;
+      }
+      const sorted = [...allStudents].sort((a,b) => (a.rollNumber||'').localeCompare(b.rollNumber||''));
+      for (const s of sorted) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><button class="btn secondary delete-student-btn" data-id="${escapeHtml(s.studentId || '')}">Delete</button></td>
+          <td>${escapeHtml(s.rollNumber || '')}</td>
+          <td>${escapeHtml(s.studentId || '')}</td>
+          <td>${escapeHtml(s.name || '')}</td>
+          <td>${escapeHtml(s.branch || '')}</td>
+          <td>${escapeHtml(s.section || '')}</td>
+          <td>${escapeHtml(s.academicYear || '')}</td>
+        `;
+        studentsTbody.appendChild(tr);
+      }
+      // attach delete handlers
+      document.querySelectorAll('.delete-student-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const id = btn.getAttribute('data-id');
+          if (!id) return;
+          if (!confirm('Delete student ' + id + '?')) return;
+          try {
+            const resp = await fetch(`${BACKEND_URL}/api/students/${encodeURIComponent(id)}`, { method: 'DELETE' });
+            const text = await resp.text();
+            if (!resp.ok) {
+              let msg = text;
+              try { msg = JSON.parse(text).message || text; } catch(e){}
+              showMessage(msg || 'Delete failed', 'error');
+              return;
+            }
+            showMessage('Student deleted');
+            await fetchAllStudents();
+          } catch (err) {
+            console.error("Delete student error:", err);
+            showMessage('Error deleting student', 'error');
+          }
+        });
+      });
+    }
+
+    // escape helper for safe text insertion
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replace(/[&<>"'`=\/]/g, function(s){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;","`":"&#96;","/":"&#47;"})[s]; });
+    }
+
+    // Lecturer login
+    loginLectBtn.addEventListener('click', async () => {
+      const email = document.getElementById('lecturer-email').value.trim();
+      const password = document.getElementById('lecturer-password').value.trim();
+      if (!email || !password) { showMessage('Enter email & password', 'error'); return; }
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        currentUserRole = 'lecturer';
+        showMessage('Logged in as lecturer');
+      } catch (err) {
+        console.error("Lecturer login error:", err);
+        showMessage('Lecturer login failed. Check credentials.', 'error');
+      }
+    });
+
+    // Student login (quick)
+    loginStudentBtn.addEventListener('click', async () => {
+      const sid = document.getElementById('student-id-input').value.trim();
+      if (!sid) { showMessage('Enter Student ID', 'error'); return; }
+      try {
+        // Ensure students loaded
+        await fetchAllStudents();
+        const found = allStudents.find(s => (s.studentId === sid || s.rollNumber === sid));
+        if (!found) { showMessage('Student not found', 'error'); return; }
+
+        // anonymous auth to satisfy Firestore reads
+        await signInAnonymously(auth);
+        currentUserRole = 'student';
+        sessionUserId = `student:${found.studentId}`;
+        studentPortalId.value = found.studentId;
+        showMessage(`Logged in as ${found.name || found.studentId}`);
+        renderUI();
+      } catch (err) {
+        console.error("Student login error:", err);
+        showMessage('Student login failed', 'error');
+      }
+    });
+
+    // Logout handlers
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await signOut(auth);
+      } catch (e) { console.warn("signOut error:", e); }
+      currentUserRole = null;
+      sessionUserId = null;
+      renderUI();
+      showMessage('Logged out');
+    });
+    studentLogoutBtn.addEventListener('click', async () => {
+      try { await signOut(auth); } catch (e){ }
+      currentUserRole = null;
+      sessionUserId = null;
+      renderUI();
+      showMessage('Logged out');
+    });
+
+    // onAuthStateChanged to set session uid for lecturers
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // If user is anonymous and we already set a student session, keep it
+        if (user.isAnonymous && currentUserRole === 'student' && sessionUserId && sessionUserId.startsWith('student:')) {
+          // keep student sessionUserId
+        } else {
+          // treat as lecturer login
+          sessionUserId = user.uid;
+          currentUserRole = 'lecturer';
         }
-
-        function renderUI() {
-            loginSection.classList.add('hidden');
-            lecturerSection.classList.add('hidden');
-            userInfoSection.classList.add('hidden');
-            studentSection.classList.remove('hidden');
-
-            if (isAuthReady) {
-                studentAuthStatus.classList.add('hidden');
-                studentInputArea.classList.remove('hidden');
-            } else {
-                studentAuthStatus.classList.remove('hidden');
-                studentInputArea.classList.add('hidden');
-                studentAuthStatus.textContent = "Initializing student access...";
-            }
-
-            if (currentUserRole === 'lecturer') {
-                loginSection.classList.add('hidden');
-                lecturerSection.classList.remove('hidden');
-                userInfoSection.classList.remove('hidden');
-                userInfoSection.classList.add('flex');
-            } else {
-                loginSection.classList.remove('hidden');
-            }
+        renderUI();
+      } else {
+        // no firebase user
+        if (!currentUserRole) {
+          sessionUserId = null;
         }
+        renderUI();
+      }
+    });
 
-        // --- Firebase Initialization and Authentication ---
-        async function initializeFirebase() {
-            try {
-                if (Object.keys(firebaseConfig).length > 0) {
-                    app = initializeApp(firebaseConfig);
-                    db = getFirestore(app);
-                    auth = getAuth(app);
-                    console.log("Firebase initialized successfully.");
+    // Render UI based on currentUserRole
+    function renderUI() {
+      if (currentUserRole === 'lecturer') {
+        loginCard.classList.add('hidden');
+        lecturerPortal.classList.remove('hidden');
+        studentPortal.classList.add('hidden');
+        lecturerUserinfo.textContent = `User: ${sessionUserId || '--'}`;
+      } else if (currentUserRole === 'student') {
+        loginCard.classList.add('hidden');
+        lecturerPortal.classList.add('hidden');
+        studentPortal.classList.remove('hidden');
+        studentUserinfo.textContent = `Student: ${sessionUserId ? sessionUserId.replace('student:','') : '--'}`;
+        // prefill id in student portal input if available
+        if (sessionUserId && sessionUserId.startsWith('student:')) { studentPortalId.value = sessionUserId.replace('student:',''); }
+      } else {
+        loginCard.classList.remove('hidden');
+        lecturerPortal.classList.add('hidden');
+        studentPortal.classList.add('hidden');
+      }
+    }
 
-                    onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            sessionUserId = user.uid;
-                            currentUserIdSpan.textContent = sessionUserId;
-                            isAuthReady = true;
-
-                            if (!hasFetchedStudentsInitially) {
-                                await fetchAllStudentsFromBackend();
-                                hasFetchedStudentsInitially = true;
-                            }
-                            renderUI();
-                        } else {
-                            if (initialAuthToken) {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } else {
-                                await signInAnonymously(auth);
-                            }
-                        }
-                    });
-                } else {
-                    console.error("Firebase config is missing.");
-                    showMessage('Firebase configuration is missing.', 'error');
-                }
-            } catch (error) {
-                console.error("Initialization error:", error);
-                if (error.code === 'auth/admin-restricted-operation') {
-                    showMessage(`Authentication error: ${error.message}. Check Firebase Console > Authentication.`, 'error');
-                    studentAuthStatus.textContent = "Error: Authentication failed.";
-                } else if (error.code === 'auth/api-key-not-valid') {
-                     showMessage(`Authentication error: ${error.message}. Please ensure your 'apiKey' is correct.`, 'error');
-                    studentAuthStatus.textContent = "Error: Invalid Firebase API Key.";
-                } else {
-                    showMessage(`Error initializing app: ${error.message}`, 'error');
-                    studentAuthStatus.textContent = `Error: ${error.message}`;
-                }
-            }
+    // CSV upload to backend
+    uploadCsvBtn.addEventListener('click', async () => {
+      if (currentUserRole !== 'lecturer') { showMessage('You must be a lecturer to upload CSVs', 'error'); return; }
+      const files = csvUploadInput.files;
+      if (!files || files.length === 0) { showMessage('Select CSV file(s) to upload', 'error'); return; }
+      const fd = new FormData();
+      for (let i=0;i<files.length;i++) fd.append('files', files[i]);
+      try {
+        const resp = await fetch(`${BACKEND_URL}/api/students/upload`, { method:'POST', body:fd });
+        const text = await resp.text();
+        if (!resp.ok) {
+          let msg = text;
+          try { msg = JSON.parse(text).message || text; } catch(e){}
+          showMessage(msg || 'CSV upload failed', 'error');
+          return;
         }
+        const result = JSON.parse(text);
+        showMessage(result.message || 'CSV uploaded');
+        csvUploadInput.value = '';
+        await fetchAllStudents();
+      } catch (err) {
+        console.error("CSV upload error:", err);
+        showMessage('CSV upload failed', 'error');
+      }
+    });
 
-        loginBtn.addEventListener('click', async () => {
-            if (!isAuthReady) {
-                showMessage('Firebase is still initializing. Please wait a moment.', 'error');
-                return;
-            }
-            const email = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-            if (!email || !password) {
-                showMessage('Please enter both email and password.', 'error');
-                return;
-            }
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                currentUserRole = 'lecturer';
-                showMessage('Logged in successfully as Lecturer!');
-                renderUI();
-            } catch (error) {
-                console.error("Firebase Email/Password Login error:", error);
-                let errorMessage = 'Login failed. Please check your email and password.';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'No user found with this email.';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage = 'Incorrect password.';
-                }
-                showMessage(errorMessage, 'error');
-            }
-            passwordInput.value = '';
-        });
-
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                currentUserRole = null;
-                showMessage('Logged out successfully.');
-                renderUI();
-            } catch (error) {
-                console.error("Error during logout:", error);
-                showMessage(`Error during logout: ${error.message}`, 'error');
-            }
-        });
-
-        // --- Student Data Management (Backend API Calls) ---
-        async function fetchAllStudentsFromBackend() {
-            if (!isAuthReady) {
-                return;
-            }
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/students`);
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
-                }
-                allStudentsData = await response.json();
-                if (currentUserRole === 'lecturer') {
-                    loadStudentsForLecturer();
-                }
-            } catch (error) {
-                console.error("Error fetching students from backend:", error);
-                showMessage(`Error loading students from backend: ${error.message}. Please ensure your Python backend is running.`, 'error');
-            }
+    // Add student
+    addStudentBtn.addEventListener('click', async () => {
+      if (currentUserRole !== 'lecturer') { showMessage('Lecturer only', 'error'); return; }
+      const payload = {
+        studentId: (addStudentIdInput.value || '').trim(),
+        rollNumber: (addRollInput.value || '').trim(),
+        name: (addNameInput.value || '').trim(),
+        branch: (addBranchInput.value || '').trim(),
+        section: (addSectionInput.value || '').trim(),
+        academicYear: (addYearInput.value || '').trim()
+      };
+      if (!payload.rollNumber || !payload.branch || !payload.section || !payload.academicYear) {
+        showMessage('Provide rollNumber, branch, section and academicYear', 'error'); return;
+      }
+      try {
+        const resp = await fetch(`${BACKEND_URL}/api/students`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+        const text = await resp.text();
+        if (!resp.ok) {
+          let msg = text;
+          try { msg = JSON.parse(text).message || text; } catch(e){}
+          showMessage(msg || 'Add student failed', 'error');
+          return;
         }
+        const data = JSON.parse(text);
+        showMessage(data.message || 'Student added');
+        addStudentIdInput.value=''; addRollInput.value=''; addNameInput.value=''; addBranchInput.value=''; addSectionInput.value=''; addYearInput.value='';
+        await fetchAllStudents();
+      } catch (err) {
+        console.error("Add student error:", err);
+        showMessage('Error adding student', 'error');
+      }
+    });
 
-        uploadCsvBtn.addEventListener('click', async () => {
-            if (currentUserRole !== 'lecturer' || !isAuthReady) {
-                showMessage('You must be logged in as a lecturer to upload student data.', 'error');
-                return;
-            }
+    refreshStudentsBtn.addEventListener('click', async () => {
+      await fetchAllStudents();
+      showMessage('Student list refreshed');
+    });
 
-            const files = csvUploadInput.files;
-            if (files.length === 0) {
-                showMessage('Please select one or more CSV files to upload.', 'error');
-                return;
-            }
-            const formData = new FormData();
-            for (let i = 0; i < files.length; i++) {
-                formData.append('files', files[i]);
-            }
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/students/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const responseText = await response.text();
-                if (!response.ok) {
-                    let errorResult;
-                    try {
-                        errorResult = JSON.parse(responseText);
-                        showMessage(`Upload failed: ${errorResult.error || response.statusText}`, 'error');
-                    } catch (parseError) {
-                        showMessage(`Upload failed: Server returned an unexpected response. Check backend terminal for errors.`, 'error');
-                    }
-                    return;
-                }
-                const result = JSON.parse(responseText);
-                showMessage(result.message);
-                csvUploadInput.value = '';
-                await fetchAllStudentsFromBackend();
-            } catch (error) {
-                console.error("Error uploading CSV to backend:", error);
-                showMessage(`Error uploading CSV: ${error.message}. Please ensure your Python backend is running and responding correctly.`, 'error');
-            }
-        });
+    // Load students for marking attendance based on filters
+    function loadStudentsForMarking() {
+      const branch = filterBranchMark.value;
+      const section = filterSectionMark.value;
+      const year = filterYearMark.value;
 
-        // --- Lecturer Functions ---
-        function loadStudentsForLecturer() {
-            attendanceTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-4">Please select class filters to load students for marking attendance.</td></tr>';
+      attendanceListBody.innerHTML = '';
+      if (!branch || !section || !year) {
+        attendanceListBody.innerHTML = '<tr><td colspan="3" class="small">Select Branch, Section and Year to load students.</td></tr>';
+        return;
+      }
+      const filtered = allStudents.filter(s => s.branch === branch && s.section === section && String(s.academicYear) === String(year));
+      if (!filtered || filtered.length === 0) {
+        attendanceListBody.innerHTML = '<tr><td colspan="3" class="small">No students found for selected filters.</td></tr>';
+        return;
+      }
+      filtered.sort((a,b)=> (a.rollNumber||'').localeCompare(b.rollNumber||''));
+      for (const s of filtered) {
+        const tr = document.createElement('tr');
+        const sid = s.studentId || s.rollNumber || Math.random().toString(36).slice(2,8);
+        tr.innerHTML = `
+          <td>${escapeHtml(s.rollNumber || '')}</td>
+          <td style="text-align:left">${escapeHtml(s.name || '')}</td>
+          <td>
+            <label style="margin-right:8px"><input type="radio" name="attendance-${escapeHtml(sid)}" value="present"> Present</label>
+            <label><input type="radio" name="attendance-${escapeHtml(sid)}" value="absent"> Absent</label>
+            <input type="hidden" data-studentid="${escapeHtml(sid)}" />
+          </td>
+        `;
+        attendanceListBody.appendChild(tr);
+      }
+    }
 
-            const selectedBranch = filterBranchMarkSelect.value;
-            const selectedSection = filterSectionMarkSelect.value;
-            const selectedAcademicYear = filterAcademicYearMarkSelect.value;
+    filterBranchMark.addEventListener('change', loadStudentsForMarking);
+    filterSectionMark.addEventListener('change', loadStudentsForMarking);
+    filterYearMark.addEventListener('change', loadStudentsForMarking);
 
-            if (!selectedBranch || !selectedSection || !selectedAcademicYear) {
-                return;
-            }
+    // Save attendance to Firestore
+    saveAttendanceBtn.addEventListener('click', async () => {
+      if (currentUserRole !== 'lecturer') { showMessage('Lecturer only', 'error'); return; }
+      const className = classNameInput.value.trim();
+      const date = attendanceDateInput.value;
+      const branch = filterBranchMark.value;
+      const section = filterSectionMark.value;
+      const year = filterYearMark.value;
 
-            const filteredStudents = allStudentsData.filter(student => {
-                return (student.branch === selectedBranch) &&
-                       (student.section === selectedSection) &&
-                       (String(student.academicYear) === selectedAcademicYear);
-            });
+      if (!className || !date || !branch || !section || !year) { showMessage('Fill class name, date and filters', 'error'); return; }
 
-            attendanceTableBody.innerHTML = '';
-            if (filteredStudents.length === 0) {
-                attendanceTableBody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-4">No students found for the selected filters.</td></tr>';
-                return;
-            }
-
-            filteredStudents.forEach(student => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="text-left font-semibold">${student.name} (<span class="font-mono text-gray-600">${student.rollNumber}</span>)</td>
-                    <td class="text-center">
-                        <div class="radio-btn-group">
-                            <label>
-                                <input type="radio" id="present-${student.studentId}" name="attendance-${student.studentId}" value="present" class="form-radio h-4 w-4 text-green-600">
-                                <span class="ml-2 text-gray-700">Present</span>
-                            </label>
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        <div class="radio-btn-group">
-                            <label>
-                                <input type="radio" id="absent-${student.studentId}" name="attendance-${student.studentId}" value="absent" class="form-radio h-4 w-4 text-red-600">
-                                <span class="ml-2 text-gray-700">Absent</span>
-                            </label>
-                        </div>
-                    </td>
-                `;
-                attendanceTableBody.appendChild(row);
-            });
+      // gather marked
+      const rows = attendanceListBody.querySelectorAll('tr');
+      const records = {};
+      let total = 0;
+      for (const r of rows) {
+        const radios = r.querySelectorAll('input[type="radio"]');
+        if (!radios || radios.length === 0) continue;
+        // name is like attendance-<studentId>
+        const name = radios[0].name;
+        const studentId = name.replace(/^attendance-/, '');
+        total++;
+        const present = r.querySelector(`input[name="${name}"][value="present"]`);
+        const absent = r.querySelector(`input[name="${name}"][value="absent"]`);
+        if (present && present.checked) records[studentId] = true;
+        else if (absent && absent.checked) records[studentId] = false;
+        else {
+          showMessage('Mark attendance for all students before saving', 'error');
+          return;
         }
+      }
 
-        filterBranchMarkSelect.addEventListener('change', loadStudentsForLecturer);
-        filterSectionMarkSelect.addEventListener('change', loadStudentsForLecturer);
-        filterAcademicYearMarkSelect.addEventListener('change', loadStudentsForLecturer);
-
-        saveAttendanceBtn.addEventListener('click', async () => {
-            if (currentUserRole !== 'lecturer' || !isAuthReady) {
-                showMessage('You must be logged in as a lecturer to save attendance.', 'error');
-                return;
-            }
-            const className = classNameInput.value.trim();
-            const attendanceDate = attendanceDateInput.value;
-            const selectedBranch = filterBranchMarkSelect.value;
-            const selectedSection = filterSectionMarkSelect.value;
-            const selectedAcademicYear = filterAcademicYearMarkSelect.value;
-
-            if (!className || !attendanceDate || !selectedBranch || !selectedSection || !selectedAcademicYear) {
-                showMessage('Please fill out all class and date fields.', 'error');
-                return;
-            }
-            const attendanceRecords = {};
-            const displayedStudentElements = attendanceTableBody.querySelectorAll('tr');
-
-            const studentIdsOnList = Array.from(displayedStudentElements).map(row => {
-                const radio = row.querySelector('input[type="radio"]');
-                if (!radio || !radio.name) return null;
-                // name format: attendance-<studentId>
-                return radio.name.substring('attendance-'.length);
-            }).filter(Boolean);
-
-            const markedStudents = new Set();
-            displayedStudentElements.forEach(row => {
-                const radio = row.querySelector('input[type="radio"]');
-                if (!radio || !radio.name) return;
-                const studentId = radio.name.substring('attendance-'.length);
-                const presentRadio = row.querySelector(`input[name="attendance-${studentId}"][value="present"]`);
-                const absentRadio = row.querySelector(`input[name="attendance-${studentId}"][value="absent"]`);
-
-                if (presentRadio && presentRadio.checked) {
-                    markedStudents.add(studentId);
-                    attendanceRecords[studentId] = true;
-                } else if (absentRadio && absentRadio.checked) {
-                    markedStudents.add(studentId);
-                    attendanceRecords[studentId] = false;
-                }
-            });
-
-            if (markedStudents.size !== studentIdsOnList.length) {
-                showMessage('Please mark attendance for all students on the list.', 'error');
-                return;
-            }
-
-            try {
-                const docId = `${className.replace(/\s+/g, '-')}-${selectedBranch}-${selectedSection}-${selectedAcademicYear}-${attendanceDate}`;
-                const attendanceRef = doc(db, `artifacts/${appId}/public/data/attendance`, docId);
-
-                await setDoc(attendanceRef, {
-                    className: className,
-                    date: attendanceDate,
-                    branch: selectedBranch,
-                    section: selectedSection,
-                    academicYear: selectedAcademicYear,
-                    lecturerId: sessionUserId,
-                    records: attendanceRecords,
-                    timestamp: new Date()
-                });
-                showMessage('Attendance saved successfully!');
-            } catch (e) {
-                console.error("Error saving attendance: ", e);
-                showMessage(`Error saving attendance: ${e.message}`, 'error');
-            }
+      // doc id safe
+      const docId = `${className.replace(/\s+/g,'-')}-${branch}-${section}-${year}-${date}`;
+      try {
+        const attendanceRef = doc(db, `artifacts/${appId}/public/data/attendance`, docId);
+        await setDoc(attendanceRef, {
+          records,
+          lecturerId: sessionUserId || null,
+          timestamp: new Date(),
+          className,
+          branch,
+          section,
+          academicYear: year,
+          date
         });
+        showMessage('Attendance saved successfully');
+      } catch (err) {
+        console.error("Save attendance error:", err);
+        showMessage('Error saving attendance (check Firestore rules)', 'error');
+      }
+    });
 
-        // --- Historical Attendance Functions ---
-        viewHistoricalAttendanceBtn.addEventListener('click', async () => {
-            if (currentUserRole !== 'lecturer' || !isAuthReady) {
-                showMessage('You must be logged in as a lecturer to view historical data.', 'error');
-                return;
-            }
-            const selectedBranch = filterBranchHistorySelect.value;
-            const selectedSection = filterSectionHistorySelect.value;
-            const className = classNameHistoryInput.value.trim();
+    // View historical attendance
+    viewHistoryBtn.addEventListener('click', async () => {
+      try {
+        const branch = filterBranchHistory.value;
+        const section = filterSectionHistory.value;
+        const year = filterYearHistory.value;
+        const cls = classNameHistory.value.trim();
+        if (!branch || !section || !year || !cls) { showMessage('Select branch, section, year and enter class name', 'error'); return; }
 
-            if (!selectedBranch || !selectedSection || !className) {
-                showMessage('Please select a Branch, Section, and enter a Class Name.', 'error');
-                return;
-            }
-
-            historicalAttendanceDisplay.innerHTML = '<p class="text-gray-500 text-center">Fetching historical data...</p>';
-
-            try {
-                const attendanceRef = collection(db, `artifacts/${appId}/public/data/attendance`);
-                const q = query(
-                    attendanceRef,
-                    where("branch", "==", selectedBranch),
-                    where("section", "==", selectedSection),
-                    where("className", "==", className)
-                );
-
-                const querySnapshot = await getDocs(q);
-                if (querySnapshot.empty) {
-                    historicalAttendanceDisplay.innerHTML = `<p class="text-gray-500 text-center">No historical attendance data found for this class.</p>`;
-                    return;
-                }
-
-                const attendanceRecords = {};
-                const allDates = new Set();
-                querySnapshot.forEach(doc => {
-                    const data = doc.data();
-                    allDates.add(data.date);
-                    for (const [studentId, isPresent] of Object.entries(data.records)) {
-                        if (!attendanceRecords[studentId]) {
-                            attendanceRecords[studentId] = {};
-                        }
-                        attendanceRecords[studentId][data.date] = isPresent;
-                    }
-                });
-
-                const sortedDates = Array.from(allDates).sort();
-                const filteredStudents = allStudentsData.filter(s =>
-                    s.branch === selectedBranch &&
-                    s.section === selectedSection &&
-                    // Ensure the student is in the attendance records to be displayed
-                    attendanceRecords.hasOwnProperty(s.studentId)
-                ).sort((a, b) => (a.rollNumber || '').localeCompare(b.rollNumber || ''));
-
-                if (filteredStudents.length === 0) {
-                     historicalAttendanceDisplay.innerHTML = `<p class="text-gray-500 text-center">No student data found for the selected class and section.</p>`;
-                     return;
-                }
-
-                // Generate table HTML
-                let tableHtml = `
-                    <div class="attendance-table-container">
-                        <table class="attendance-table shadow-lg rounded-lg overflow-hidden">
-                            <thead>
-                                <tr>
-                                    <th class="text-left">Roll Number</th>
-                                    ${sortedDates.map(date => `<th class="text-center">${date}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-                filteredStudents.forEach(student => {
-                    tableHtml += `<tr>`;
-                    tableHtml += `<td class="text-left font-semibold">${student.rollNumber}</td>`;
-                    sortedDates.forEach(date => {
-                        const isPresent = attendanceRecords[student.studentId] && attendanceRecords[student.studentId][date];
-                        const status = isPresent ? 'P' : 'A';
-                        const statusClass = isPresent ? 'present' : 'absent';
-                        tableHtml += `<td class="text-center"><span class="${statusClass}">${status}</span></td>`;
-                    });
-                    tableHtml += `</tr>`;
-                });
-                tableHtml += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-                historicalAttendanceDisplay.innerHTML = tableHtml;
-            } catch (e) {
-                console.error("Error viewing historical attendance:", e);
-                showMessage(`Error viewing historical data: ${e.message}`, 'error');
-                historicalAttendanceDisplay.innerHTML = `<p class="text-gray-500 text-center">Error loading data.</p>`;
-            }
+        const attRef = collection(db, `artifacts/${appId}/public/data/attendance`);
+        const q = query(attRef, where("branch","==",branch), where("section","==",section), where("academicYear","==",year), where("className","==",cls));
+        const snap = await getDocs(q);
+        if (snap.empty) { historyDisplay.innerHTML = `<p class="small">No attendance records found for the selected filters.</p>`; return; }
+        // aggregate
+        const datesSet = new Set();
+        const recordsByStudent = {};
+        snap.forEach(docSnap => {
+          const d = docSnap.data();
+          const date = d.date || (d.timestamp && d.timestamp.toDate ? d.timestamp.toDate().toISOString().slice(0,10) : null);
+          if (!date) return;
+          datesSet.add(date);
+          const recs = d.records || {};
+          for (const sid in recs) {
+            recordsByStudent[sid] = recordsByStudent[sid] || {};
+            recordsByStudent[sid][date] = !!recs[sid];
+          }
         });
+        const dates = Array.from(datesSet).sort();
+        // filter students who belong to branch/section/year and have records
+        const students = allStudents.filter(s => s.branch===branch && s.section===section && String(s.academicYear)===String(year) && recordsByStudent[s.studentId]);
+        students.sort((a,b)=> (a.rollNumber||'').localeCompare(b.rollNumber||''));
+        if (students.length===0) { historyDisplay.innerHTML = `<p class="small">No student records found.</p>`; return; }
 
-        viewAttendanceBtn.addEventListener('click', async () => {
-            if (!isAuthReady) {
-                showMessage('Authentication is still initializing. Please wait a moment and try again.', 'error');
-                return;
-            }
-            const studentId = studentIdInput.value.trim();
-            if (!studentId) {
-                showMessage('Please enter your Student ID.', 'error');
-                return;
-            }
-            const studentExists = allStudentsData.some(student => student.studentId === studentId);
-            if (!studentExists) {
-                showMessage('Student ID not found. Please enter a valid ID.', 'error');
-                studentAttendanceDisplay.classList.add('hidden');
-                return;
-            }
-            studentAttendanceDisplay.classList.remove('hidden');
-            attendancePercentage.textContent = 'Calculating...';
-            studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">Loading attendance records...</p>';
+        // build table
+        let html = `<div style="overflow:auto"><table class="attendance-table"><thead><tr><th>Roll</th><th>Name</th>`;
+        for (const d of dates) html += `<th>${escapeHtml(d)}</th>`;
+        html += `</tr></thead><tbody>`;
+        for (const s of students) {
+          html += `<tr><td>${escapeHtml(s.rollNumber || '')}</td><td style="text-align:left">${escapeHtml(s.name || '')}</td>`;
+          for (const d of dates) {
+            const val = recordsByStudent[s.studentId] && recordsByStudent[s.studentId][d];
+            if (val === true) html += `<td class="present">P</td>`;
+            else if (val === false) html += `<td class="absent">A</td>`;
+            else html += `<td>-</td>`;
+          }
+          html += `</tr>`;
+        }
+        html += `</tbody></table></div>`;
+        historyDisplay.innerHTML = html;
+      } catch (err) {
+        console.error("view history error:", err);
+        showMessage('Error loading history (check Firestore rules)', 'error');
+      }
+    });
 
-            const attendanceCollectionRef = collection(db, `artifacts/${appId}/public/data/attendance`);
-            const student = allStudentsData.find(s => s.studentId === studentId);
-if (!student) {
-    showMessage('Student ID not found. Please enter a valid ID.', 'error');
-    studentAttendanceDisplay.classList.add('hidden');
-    return;
-}
+    // Student view attendance
+    studentViewBtn.addEventListener('click', async () => {
+      const sid = studentPortalId.value.trim();
+      if (!sid) { showMessage('Enter Student ID', 'error'); return; }
+      // ensure students loaded
+      await fetchAllStudents();
+      const student = allStudents.find(s => s.studentId===sid || s.rollNumber===sid);
+      if (!student) { showMessage('Student not found', 'error'); return; }
+      // populate details
+      studentDetailsBody.innerHTML = `
+        <tr><th style="text-align:left">Student ID</th><td>${escapeHtml(student.studentId)}</td></tr>
+        <tr><th style="text-align:left">Roll Number</th><td>${escapeHtml(student.rollNumber)}</td></tr>
+        <tr><th style="text-align:left">Name</th><td>${escapeHtml(student.name)}</td></tr>
+        <tr><th style="text-align:left">Branch</th><td>${escapeHtml(student.branch)}</td></tr>
+        <tr><th style="text-align:left">Section</th><td>${escapeHtml(student.section)}</td></tr>
+        <tr><th style="text-align:left">Academic Year</th><td>${escapeHtml(student.academicYear)}</td></tr>
+      `;
+      studentDetailsSection.classList.remove('hidden');
 
-// Show student details
-const detailsBody = document.getElementById('student-details-body');
-const detailsTable = document.getElementById('student-details-table');
-detailsBody.innerHTML = `
-  <tr><th class="text-left">Student ID</th><td>${student.studentId}</td></tr>
-  <tr><th class="text-left">Roll Number</th><td>${student.rollNumber}</td></tr>
-  <tr><th class="text-left">Name</th><td>${student.name}</td></tr>
-  <tr><th class="text-left">Branch</th><td>${student.branch}</td></tr>
-  <tr><th class="text-left">Section</th><td>${student.section}</td></tr>
-  <tr><th class="text-left">Academic Year</th><td>${student.academicYear}</td></tr>
-`;
-detailsTable.classList.remove('hidden');
-
-            try {
-                const q = query(attendanceCollectionRef, where("records." + studentId, "!=", null));
-
-                onSnapshot(q, (snapshot) => {
-                    let totalClasses = 0;
-                    let classesAttended = 0;
-                    const details = [];
-
-                    if (snapshot.empty) {
-                        studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">No attendance records found for this student.</p>';
-                        attendancePercentage.textContent = '0%';
-                        return;
-                    }
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
-                        const isPresent = data.records[studentId];
-                        totalClasses++;
-                        if (isPresent) {
-                            classesAttended++;
-                        }
-                        details.push({
-                            className: data.className,
-                            date: data.date,
-                            status: isPresent ? 'Present' : 'Absent',
-                            isPresent: isPresent
-                        });
-                    });
-
-                    details.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                    studentAttendanceDetails.innerHTML = '';
-                    if (details.length === 0) {
-                        studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">No attendance records found for this student.</p>';
-                        attendancePercentage.textContent = '0%';
-                    } else {
-                        details.forEach(record => {
-                            const detailDiv = document.createElement('div');
-                            detailDiv.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-lg shadow-sm mb-2';
-                            detailDiv.innerHTML = `
-                                <span class="text-gray-800 font-semibold">${record.className} - ${record.date}</span>
-                                <span class="font-bold ${record.isPresent ? 'text-green-600' : 'text-red-600'}">${record.status}</span>
-                            `;
-                            studentAttendanceDetails.appendChild(detailDiv);
-                        });
-                        const percentage = totalClasses > 0 ? ((classesAttended / totalClasses) * 100).toFixed(2) : 0;
-                        attendancePercentage.textContent = `${percentage}%`;
-                    }
-                }, (error) => {
-                    if (error.code === 'permission-denied') {
-                        showMessage('Permission denied to access attendance data. Please check your Firestore Security Rules.', 'error');
-                        console.error("Firestore Security Rule Error:", error);
-                    } else {
-                        showMessage(`Error fetching attendance: ${error.message}`, 'error');
-                        console.error("Error fetching student attendance with onSnapshot:", error);
-                    }
-                });
-            } catch (e) {
-                console.error("Error setting up attendance listener:", e);
-                showMessage(`Error setting up attendance listener: ${e.message}`, 'error');
-                attendancePercentage.textContent = '--%';
-                studentAttendanceDetails.innerHTML = '<p class="text-gray-500 text-center">Error loading attendance.</p>';
-            }
+      try {
+        const attRef = collection(db, `artifacts/${appId}/public/data/attendance`);
+        // Get all attendance docs and filter client-side for records containing this student
+        const qAll = query(attRef);
+        const snap = await getDocs(qAll);
+        let total = 0, present = 0;
+        const list = [];
+        snap.forEach(docSnap => {
+          const d = docSnap.data();
+          const date = d.date || (d.timestamp && d.timestamp.toDate ? d.timestamp.toDate().toISOString().slice(0,10) : null);
+          const recs = d.records || {};
+          if (recs[student.studentId] !== undefined) {
+            list.push({ date, present: !!recs[student.studentId], className: d.className || '', branch: d.branch || '' });
+            total++;
+            if (recs[student.studentId]) present++;
+          }
         });
+        list.sort((a,b)=> new Date(a.date) - new Date(b.date));
+        // populate
+        if (list.length === 0) {
+          studentAttList.innerHTML = `<p class="small">No attendance records found.</p>`;
+        } else {
+          let out = '<table class="attendance-table" style="width:100%"><thead><tr><th>Date</th><th>Class</th><th>Presence</th></tr></thead><tbody>';
+          for (const rec of list) {
+            out += `<tr><td>${escapeHtml(rec.date)}</td><td style="text-align:left">${escapeHtml(rec.className)}</td><td>${rec.present ? '<span class="present">Present</span>' : '<span class="absent">Absent</span>'}</td></tr>`;
+          }
+          out += '</tbody></table>';
+          studentAttList.innerHTML = out;
+        }
+        const perc = total>0 ? ((present/total)*100).toFixed(2) : 0;
+        studentAttPerc.textContent = `${perc}%`;
+      } catch (err) {
+        console.error("student view error:", err);
+        showMessage('Error fetching attendance (check Firestore rules)', 'error');
+      }
+    });
 
-        // --- Initial Setup ---
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const dd = String(today.getDate()).padStart(2, '0');
-        attendanceDateInput.value = `${yyyy}-${mm}-${dd}`;
+    // Utility: initial load
+    (async function init() {
+      // show login by default
+      renderUI();
+      // try to fetch students in background for faster operations
+      await fetchAllStudents();
+    })();
 
-        window.onload = initializeFirebase;
-    </script>
+  </script>
 </body>
 </html>
 
