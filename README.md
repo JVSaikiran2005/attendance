@@ -81,4 +81,3 @@ pip install flask-cors pip install Flask firebase-admin pandas flask-cors
 2.  Enter your **Student ID** or **Roll Number**.
 3.  The system performs a local lookup against the fetched student list. If found, it uses Firebase Anonymous Authentication and switches to the Student Portal.
 
-## 📂 File Structure
