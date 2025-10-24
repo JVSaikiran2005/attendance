@@ -1,128 +1,84 @@
-Setup Instructions
-Follow these steps to get the project up and running on your local machine.
+# 🏫 Online Attendance System
 
-1. Firebase Project Setup
-Create a Firebase Project:
+A complete online attendance system featuring separate portals for **Lecturers** and **Students**, built with a Python (Flask) backend and a vanilla JavaScript frontend using Tailwind CSS for styling. Data is securely managed using **Google Firestore**.
 
-Go to the Firebase Console.
-Click "Add project" and follow the on-screen instructions.
-Give your project a name (e.g., engineering-results-portal or jvskresults).
-Enable Google Analytics if desired (optional).
-Once created, go to your project dashboard.
-Set up Firestore Database:
+The system is designed to handle student data management (via CSV upload or single entry) and allows lecturers to mark, save, and view historical attendance, while students can check their individual records and overall percentage.
 
-In the Firebase Console, navigate to "Build" > "Firestore Database".
-Click "Create database".
-Choose "Start in production mode" (you will set up rules later).
-Select a location for your database (e.g., nam5 for North America, asia-south1 for Mumbai).
-Click "Enable".
-Configure Firestore Security Rules:
+## 🚀 Key Features
 
-While in "Firestore Database", go to the "Rules" tab.
-Replace the default rules with the following. These rules allow public read access (for students) and authenticated write access (for admins).
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Allow public read access to student results
-    // Allow write access only if the user is authenticated (e.g., an admin)
-    match /artifacts/{appId}/public/data/studentResults/{document=**} {
-      allow read;
-      allow write: if request.auth != null;
-    }
-  }
-}
-Click "Publish".
-Enable Email/Password Authentication:
+### Frontend (index.html)
+* **Dual Portals:** Separate login flows and interfaces for **Lecturers** and **Students**.
+* **Modern UI:** Clean, responsive design built with **Tailwind CSS** and the **Inter** font.
+* **Firebase Authentication:** Uses Firebase Auth for lecturer email/password login and student anonymous login.
+* **Student View:** Allows students to view their details, overall attendance percentage, and a history of their attendance records.
+* **Lecturer View:** Provides tools for:
+    * Uploading student lists via **CSV**.
+    * Adding or deleting individual student records.
+    * Filtering students by **Branch, Section, and Academic Year** to mark daily attendance.
+    * Viewing historical attendance records in a tabular format.
 
-In the Firebase Console, navigate to "Build" > "Authentication".
-Click on the "Sign-in method" tab.
-Find "Email/Password" in the list. Click the pencil icon (✏️).
-Toggle the switch to "Enable" it.
-Click "Save".
-Create an Admin User Account:
+### Backend (app.py)
+* **Flask API:** A lightweight Python server built with Flask.
+* **Firestore Integration:** Uses the **Firebase Admin SDK** to manage data in **Firestore**.
+* **Student Management Endpoints:**
+    * `POST /api/students/upload`: Handles multi-file CSV uploads for bulk student creation/updates.
+    * `POST /api/students`: Adds or updates a single student record.
+    * `GET /api/students`: Retrieves the complete list of students.
+    * `DELETE /api/students/<student_id>`: Removes a student record.
+* **Attendance Storage:** Attendance records are stored in Firestore using the path `artifacts/{PROJECT_ID}/public/data/attendance`.
 
-Still in "Authentication", go to the "Users" tab.
-Click the "Add user" button.
-Enter an email address (e.g., admin@yourcollege.com) and a strong password. This will be your admin login.
-Click "Add user".
-Generate Firebase Admin SDK Service Account Key:
+## 🛠️ Technology Stack
 
-In the Firebase Console, go to "Project settings" (gear icon next to "Project overview").
-Go to the "Service accounts" tab.
-Click "Generate new private key".
-Click "Generate key". This will download a JSON file (e.g., your-project-id-firebase-adminsdk-xxxxx-xxxxxxxxxx.json).
-Rename this downloaded file to serviceAccountKey.json and move it into your backend/ directory.
-KEEP THIS FILE SECURE! Do not share it publicly or commit it to public repositories.
-Get Firebase Web App Configuration:
+* **Frontend:** HTML5, CSS (Tailwind CSS), Vanilla JavaScript
+* **Backend:** Python 3, Flask, `flask-cors`
+* **Database/Auth:** Google Firebase / Firestore (via Firebase Admin SDK and Firebase JS SDK)
 
-In "Project settings", go to the "Your apps" card.
-Click on the Web app icon (</>) if you haven't added a web app yet, or select your existing web app.
-Copy the firebaseConfig object. It will look something like this:
-const firebaseConfig = {
-  apiKey: "AIzaSyC...",
-  authDomain: "your-project-id.firebaseapp.com",
-  projectId: "your-project-id",
-  storageBucket: "your-project-id.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef1234567890",
-  measurementId: "G-XXXXXXXXXX" // Optional
-};
-You will paste this into your frontend/index.html in a later step.
-2. Backend Setup (Python Flask)
-Navigate to the Backend Directory:
+## 📋 Prerequisites
 
-cd engineering-results-portal/backend
-Create a Python Virtual Environment:
+To run this project, you need:
 
-python -m venv venv
-Activate the Virtual Environment:
+1.  **Python 3** and `pip`.
+2.  A **Firebase Project** set up with Firestore.
+3.  **Firebase Authentication** enabled (Email/Password for Lecturers, Anonymous for Students).
+4.  **Backend Dependencies:** Install the required Python packages:
+    ```bash
+    pip install Flask flask-cors firebase-admin
+    ```
+5.  A **Service Account Key** JSON file from your Firebase project, named **`serviceAccountKey.json`**, placed in the root directory of the backend (`app.py`).
 
-Windows:
-.\venv\Scripts\activate
-macOS/Linux:
-source venv/bin/activate
-Install Dependencies:
+## 🚀 Getting Started
 
-pip install -r requirements.txt
-(Ensure requirements.txt contains Flask, Flask-CORS, firebase-admin, pandas, openpyxl, PyPDF2)
+### 1. Backend Setup
 
-Verify serviceAccountKey.json:
+1.  **Firebase Configuration:** Ensure your Firestore database is initialized and security rules are set up to allow the necessary reads/writes.
+2.  **Service Account Key:** Obtain your `serviceAccountKey.json` from your Firebase project settings and place it in the same directory as `app.py`.
+3.  **Run the Flask Server:**
+    ```bash
+    python app.py
+    ```
+    python -m venv venv Activate the Virtual Environment:
 
-Make sure the serviceAccountKey.json file you downloaded from Firebase is in the backend/ directory.
-Run the Flask Backend Server:
+Windows: .\venv\Scripts\activate macOS/Linux: source venv/bin/activate Install Dependencies:
 
-python app.py
-You should see output indicating the server is running on http://127.0.0.1:5000. Keep this terminal window open and running.
+pip install -r requirements.txt (Ensure requirements.txt contains Flask, Flask-CORS, firebase-admin, pandas, openpyxl, PyPDF2)
+pip install flask-cors pip install Flask firebase-admin pandas flask-cors
+    The server will run on `http://127.0.0.1:5000` by default.
 
-3. Frontend Setup (HTML, CSS, JavaScript)
-Navigate to the Frontend Directory:
+### 2. Frontend Setup
 
-cd engineering-results-portal/frontend
-Open index.html in VS Code:
+1.  **Configuration Check:** Open `index.html` and ensure the `firebaseConfig` block in the `<script type="module">` matches your Firebase project settings (e.g., `apiKey`, `authDomain`, `projectId`, etc.).
+2.  **Open the App:** Simply open the `index.html` file in your web browser. The frontend assumes the backend is running on `http://127.0.0.1:5000`.
 
-Open the index.html file in your VS Code editor.
-Update Firebase Configuration:
+## 🔑 Usage and Login
 
-Locate the <script type="module"> block near the end of the <body> tag.
-Find the firebaseConfig object.
-Replace the placeholder values with the actual firebaseConfig you copied from the Firebase Console (Step 1.7).
-const firebaseConfig = {
-  apiKey: "YOUR_ACTUAL_API_KEY_HERE",
-  authDomain: "YOUR_ACTUAL_AUTH_DOMAIN_HERE",
-  projectId: "YOUR_ACTUAL_PROJECT_ID_HERE",
-  storageBucket: "YOUR_ACTUAL_STORAGE_BUCKET_HERE",
-  messagingSenderId: "YOUR_ACTUAL_MESSAGING_SENDER_ID_HERE",
-  appId: "YOUR_ACTUAL_APP_ID_HERE",
-  // measurementId: "YOUR_ACTUAL_MEASUREMENT_ID_HERE" // Include if present
-};
-Save index.html.
+### Lecturer Login
+1.  On the sign-in screen, select **Lecturer**.
+2.  Enter the **Email** and **Password** of a lecturer account configured in your Firebase Authentication.
+3.  The Lecturer Portal will appear, allowing access to student management and attendance marking tools.
 
-Run the Frontend:
+### Student Login
+1.  On the sign-in screen, select **Student**.
+2.  Enter your **Student ID** or **Roll Number**.
+3.  The system performs a local lookup against the fetched student list. If found, it uses Firebase Anonymous Authentication and switches to the Student Portal.
 
-pip install flask-cors
-pip install Flask firebase-admin pandas flask-cors
-
-If you have the VS Code Live Server extension, right-click index.html in the VS Code Explorer and select "Open with Live Server".
-Alternatively, open the index.html file directly in your web browser (e.g., by dragging it into the browser window). The URL will typically be file:///.../index.html or http://127.0.0.1:5500/index.html if using Live Server.
-Note: Using Live Server (http://127.0.0.1:5500) is recommended as it correctly simulates a web server environment, which is important for network requests to your Flask backend.
-
+## 📂 File Structure
